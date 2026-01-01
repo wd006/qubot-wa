@@ -1,0 +1,33 @@
+# nodejs
+/node_modules
+
+# whatsapp session
+/auth_session/
+/auth_info_baileys/
+
+
+# private config
+.env
+/prompts/persona.prompt
+
+# sqlite db
+*.db
+*.db-journal
+
+# os
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+
+# ide
+.vscode/
+.idea/
+
+# others
+/.old/
+/.test/
+.notes
+list-models.js
