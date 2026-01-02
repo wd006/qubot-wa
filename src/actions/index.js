@@ -1,31 +1,67 @@
-// İleride buraya: const reminderAction = require('./reminder'); şeklinde eklemeler yapacağız.
+const fs = require('fs');
+const path = require('path');
 
-const actions = {
-    // 'set_reminder': reminderAction, 
-};
+const actionMap = new Map(); // keeps the AI ​​action names.
+const commandMap = new Map(); // keeps the classic command names.
 
 /**
- * Gelen aksiyonu ilgili dosyaya yönlendirir.
- * @param {object} sock - Baileys soket bağlantısı
- * @param {object} msg - Gelen mesaj objesi
- * @param {object} actionData - AI'dan gelen action verisi { type, params }
+ * It scans all the files in the actions folder and populates the maps.
  */
-async function handleAction(sock, msg, actionData) {
+function loadActions() {
+    const actionsPath = path.join(__dirname);
+    const actionFiles = fs.readdirSync(actionsPath).filter(file => file.endsWith('.js') && file !== 'index.js');
+
+    for (const file of actionFiles) {
+        const filePath = path.join(actionsPath, file);
+        const actionModule = require(filePath);
+
+        // fill the AI ​​Action Map
+        if (actionModule.actionName) {
+            actionMap.set(actionModule.actionName, actionModule);
+        }
+
+        // fill the classic command map
+        if (actionModule.command) {
+            const cmd = actionModule.command;
+
+            // add main command name
+            commandMap.set(cmd.name.toLowerCase(), actionModule);
+
+            // add aliases
+            if (cmd.aliases && Array.isArray(cmd.aliases)) {
+                cmd.aliases.forEach(alias => commandMap.set(alias.toLowerCase(), actionModule));
+            }
+        }
+    }
+    console.log(`✅ ${actionMap.size} AI action and ${commandMap.size} command loaded.`);
+}
+
+/**
+ * It executes the action dictated by the AI.
+ */
+async function handleAIAction(sock, msg, actionData) {
     if (!actionData || !actionData.type) return;
 
-    console.log(`⚙️ Aksiyon Tetiklendi: ${actionData.type}`);
-
-    const handler = actions[actionData.type];
-
+    const handler = actionMap.get(actionData.type);
     if (handler) {
-        try {
-            await handler(sock, msg, actionData.params);
-        } catch (error) {
-            console.error(`❌ Aksiyon Hatası (${actionData.type}):`, error);
-        }
-    } else {
-        console.warn(`⚠️ Tanımsız Aksiyon: ${actionData.type}`);
+        await handler.execute(sock, msg, actionData.params);
     }
 }
 
-module.exports = { handleAction };
+/**
+ * It executes the command that comes with the prefix.
+ */
+async function handleCommand(sock, msg, commandName, args) {
+    const handler = commandMap.get(commandName);
+    if (handler) {
+        const commandText = args.join(' ');
+        await handler.execute(sock, msg, commandText);
+        return true; // found and execute
+    }
+    return false; // no command
+}
+
+// load in start
+loadActions();
+
+module.exports = { handleAIAction, handleCommand };
