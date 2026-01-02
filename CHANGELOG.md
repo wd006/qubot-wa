@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/wd006/qubot-wa/compare/v1.1.0...v1.2.0) (2026-01-02)
+
+
+### Features
+
+* **l10n:** Implement localization system for multi-language support ([f99d9ae](https://github.com/wd006/qubot-wa/commit/f99d9ae870ccf35ee5905139f1df48c10690794d))
+
 ## [1.1.0](https://github.com/wd006/qubot-wa/compare/v0.1.0...v1.1.0) (2026-01-02)
 
 
