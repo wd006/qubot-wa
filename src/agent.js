@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const config = require('./config');
+const helpers = require('./utils');
 
 // launch ai service
 const genAI = new GoogleGenerativeAI(config.GEMINI_KEY);
@@ -38,7 +39,7 @@ Message: "${userMessage}"`;
         // if there is an error, return safe answer
         return { 
             should_reply: true,
-            reply_text: '❌ Oops! 🤖 Dude, I\'m having some problems right now! 🔧 Please try again later.', 
+            reply_text: helpers.t('general_error'), 
             mood: "error", 
             action: null 
         };

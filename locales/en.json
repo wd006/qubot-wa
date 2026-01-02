@@ -1,0 +1,28 @@
+{
+  "general_error": "❌ Oops! 🤖 Dude, I'm having some problems right now! 🔧 Please try again later.",
+  "general_maintence": "🔧 Hey buddy, I'm currently under maintenance. My developers are working on \"{why}\". Please try again later.",
+
+  "action_currency_desc": "It converts and lists exchange rates.",
+  "action_currency_header": "Currency Converter",
+  "action_currency_error_general": "There was a problem retrieving the exchange rates.",
+  "action_currency_error_usage": "I didn't understand the command. Please check the `!help currency` command.",
+  "action_currency_error_targetNotFound": "I couldn't find the target exchange rates you mentioned.",
+  "action_currency_error_baseNotFound": "I couldn't find a currency code called \"{code}\". 🤷‍♂️",
+
+  "action_tts_desc": "Converts text to speech. Example: !speak en Hello World",
+  "action_tts_error_general": "There's an issue with my voice box, I can't speak right now. 🤒",
+  "action_tts_error_usage": "You didn't write what you want me to say.",
+  "action_tts_error_lang": "I don't support the language code \"{lang}\" or you misspelled it. 🤷‍♂️",
+  
+  "action_wiki_desc": "It retrieves summary information on a topic from Wikipedia.",
+  "action_wiki_header": "Wikipedia Info",
+  "action_wiki_goLink": "For more information",
+  "action_wiki_error_general": "There was a problem connecting to Wikipedia.",
+  "action_wiki_error_usage": "You didn't specify what kind of information you wanted. Example: !wiki Türkiye",
+  "action_wiki_error_notFound": "I couldn't find a Wikipedia page for \"{query}\". 🧐",
+  "action_wiki_error_summary": "I found the page but couldn't get a summary.",
+
+  "repl_groups_desc": "Lists all the groups the bot is a part of.",
+  "repl_help_desc": "Lists all commands.",
+  "repl_say_desc": "It sends a message to the specified address."
+}

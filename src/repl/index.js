@@ -59,7 +59,7 @@ function start(sock) {
     });
 
     rl.on('close', () => {
-        console.log("Goodbyel!"); // closing message
+        console.log("Goodbye!"); // closing message
         process.exit(0);
     });
 }

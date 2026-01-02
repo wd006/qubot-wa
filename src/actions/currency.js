@@ -1,17 +1,16 @@
 const axios = require('axios');
-const logger = require('../utils/logger'); // future
 
 module.exports.command = {
     name: 'currency',
     aliases: ['kur', 'cevir', 'doviz', 'rate'],
-    description: 'It converts and lists exchange rates.',
+    description: 'action_currency_desc',
     usage: '[amount] [based_rate] [target_rate]'
 };
 
 // ai action name
 module.exports.actionName = 'get_currency_rate';
 
-module.exports.execute = async function (sock, msg, params) {
+module.exports.execute = async function (sock, msg, params, helpers) {
     let amount = 1.0;
     let baseCurrency = 'USD';
     let targetCurrencies = [];
@@ -51,7 +50,7 @@ module.exports.execute = async function (sock, msg, params) {
     } catch (parseError) {
         console.error("❌ An error occurred while parsing the parameter:", parseError);
         //logger.logAction(this.actionName || this.command.name, 'Parser', params, false, parseError.message);
-        await sock.sendMessage(msg.key.remoteJid, { text: "I didn't understand the command. Please check the `!help doviz` command." });
+        await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_currency_error_params') });
         return;
     }
     // --- END ANALYSIS ---
@@ -64,7 +63,7 @@ module.exports.execute = async function (sock, msg, params) {
         const rates = response.data.rates;
         const date = new Date(response.data.date).toLocaleDateString('en-EN');
 
-        let resultText = `📈 *Currency Converter (${date})*\n\n`;
+        let resultText = `📈 *${helpers.t('action_currency_header')} (${date})*\n\n`;
         let foundAny = false;
 
         targetCurrencies.forEach(targetCode => {
@@ -83,27 +82,30 @@ module.exports.execute = async function (sock, msg, params) {
             }
         });
 
-        // İf none of the requested exchange rates are available
+        // if none of the requested exchange rates are available
         if (!foundAny) {
+            console.log("could not be found");
             //logger.logAction(this.actionName || this.command.name, 'API', { baseCurrency, targetCurrencies }, false, 'The specified target exchange rates could not be found.');
             if (typeof params === 'string') {
-                await sock.sendMessage(msg.key.remoteJid, { text: `I couldn't find the target exchange rates you mentioned.` });
+                await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_currency_error_targetNotFound') });
             }
             return;
         }
 
         // success
+        console.log("currency success");
         //logger.logAction(this.actionName || this.command.name, typeof params === 'string' ? 'Command' : 'AI', params, true);
 
         await sock.sendMessage(msg.key.remoteJid, { text: resultText.trim() });
 
     } catch (error) {
-        let errorMessage = "There was a problem retrieving the exchange rates.";
+        let errorMessage = helpers.t('action_currency_error_general');
         if (error.response && error.response.status === 404) {
-            errorMessage = `\`${baseCurrency}\` : I couldn't find an exchange rate like that.  🤷‍♂️`;
+            errorMessage = helpers.t('action_currency_error_baseNotFound', {'code': baseCurrency});
         }
 
         // error
+        console.log("currency error");
         //logger.logAction(this.actionName || this.command.name, typeof params === 'string' ? 'Command' : 'AI', params, false, error.message);
 
         // not ai error

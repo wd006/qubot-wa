@@ -31,6 +31,9 @@ const corePrompt = loadPrompt('core.prompt');
 const personaPrompt = loadPrompt('persona.prompt');
 
 module.exports = {
+
+    LANGUAGE: 'en',
+
     GEMINI_KEY: process.env.GEMINI_KEY,
     GEMINI_MODEL: "gemini-flash-latest",
     ALLOWED_NUMBERS: process.env.OWNER_NUMBER ? [process.env.OWNER_NUMBER] : [],

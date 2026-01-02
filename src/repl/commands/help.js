@@ -1,9 +1,9 @@
+const helpers = require('../../utils');
+
 module.exports = {
     name: 'help',
-    description: 'List all terminal commands.',
+    description: 'repl_help_desc',
 
-    // This command needs to know all other commands, so
-    // it will take the 'commands' map as a parameter from the main REPL manager.
     execute: async function(sock, args, commands) {
         console.log("\n--- 💻 Terminal Commands ---");
         
@@ -11,8 +11,14 @@ module.exports = {
 
         for (const command of sortedCommands) {
             console.log(`> ${command.name}`);
-            if (command.description) console.log(`  ${command.description}`);
-            if (command.usage) console.log(`  Usage: ${command.name} ${command.usage}`);
+
+            if (command.description) {
+                console.log(`  ${helpers.t(command.description)}`);
+            }
+
+            if (command.usage) {
+                console.log(`  Usage: ${command.name} ${command.usage}`);
+            }
             console.log("");
         }
         console.log("----------------------------");

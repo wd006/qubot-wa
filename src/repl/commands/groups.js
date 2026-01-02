@@ -1,6 +1,6 @@
 module.exports = {
     name: 'groups',
-    description: 'Lists all the groups the bot belongs to.',
+    description: 'repl_groups_desc',
     
     execute: async function(sock, args) {
         try {
@@ -8,11 +8,11 @@ module.exports = {
             const groups = await sock.groupFetchAllParticipating();
             
             if (Object.keys(groups).length === 0) {
-                console.log("ℹ️ Bot şu an hiçbir grupta değil.");
+                console.log("ℹ️ The bot is not currently in any group.");
                 return;
             }
 
-            console.log("\n--- 🏢 Botun Dahil Olduğu Gruplar ---");
+            console.log("\n--- 🏢 Groups ---");
             
             // Groups are objects; their keys are the group ID, and their values ​​are the group information.
             for (const id in groups) {

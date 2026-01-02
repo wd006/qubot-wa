@@ -1,0 +1,28 @@
+{
+  "general_error": "❌ Oops! 🤖 Dostum, Bazı sorunlar yaşıyorum! 🔧 Lütfen daha sonra tekrar dene.",
+  "general_maintence": "🔧 Dostum şu anda bakımdayım. Geliştiricilerim \"{why}\" üzerinde çalışıyor. Lütfen daha sonra tekrar dene.",
+  
+  "action_currency_desc": "Döviz kurlarını çevirir ve listeler.",
+  "action_currency_header": "Döviz Çevirici",
+  "action_currency_error_general": "Döviz kurlarını çekerken bir sorun oluştu.",
+  "action_currency_error_usage": "Komutu anlayamadım. Doğru kullanım için `!yardım doviz` komutuna bakabilirsin.",
+  "action_currency_error_targetNotFound": "Belirttiğin hedef kurları bulamadım.",
+  "action_currency_error_baseNotFound": "\"{code}\" diye bir döviz kuru bulamadım. 🤷‍♂️",
+
+  "action_tts_desc": "Metni sesli mesaja çevirir. Örnek: !konus en Hello World",
+  "action_tts_error_general": "Ses tellerimde bir sorun var, şu an konuşamıyorum. 🤒",
+  "action_tts_error_usage": "Ne söylememi istediğini yazmadın.",
+  "action_tts_error_lang": "\"{lang}\" dil kodunu desteklemiyorum veya yanlış yazdın. 🤷‍♂️",
+  
+  "action_wiki_desc": "Wikipedia'dan bir konu hakkında özet bilgi getirir.",
+  "action_wiki_header": "Wikipedia Bilgisi",
+  "action_wiki_goLink": "Daha fazlası için",
+  "action_wiki_error_general": "Wikipedia'ya bağlanırken bir sorun oluştu.",
+  "action_wiki_error_usage": "Ne hakkında bilgi istediğini belirtmedin. Örnek: !wiki Türkiye",
+  "action_wiki_error_notFound": "\"{query}\" hakkında bir Wikipedia sayfası bulamadım. 🧐",
+  "action_wiki_error_summary": "Sayfayı buldum ama özetini alamadım.",
+
+  "repl_groups_desc": "Botun üye olduğu tüm grupları listeler.",
+  "repl_help_desc": "Tüm komutları listeler.",
+  "repl_say_desc": "Belirtilen adrese mesaj gönderir."
+}

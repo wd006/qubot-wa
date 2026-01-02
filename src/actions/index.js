@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const helpers = require('../utils');
 
 const actionMap = new Map(); // keeps the AI ​​action names.
 const commandMap = new Map(); // keeps the classic command names.
@@ -44,7 +45,7 @@ async function handleAIAction(sock, msg, actionData) {
 
     const handler = actionMap.get(actionData.type);
     if (handler) {
-        await handler.execute(sock, msg, actionData.params);
+        await handler.execute(sock, msg, actionData.params, helpers);
     }
 }
 
@@ -55,7 +56,7 @@ async function handleCommand(sock, msg, commandName, args) {
     const handler = commandMap.get(commandName);
     if (handler) {
         const commandText = args.join(' ');
-        await handler.execute(sock, msg, commandText);
+        await handler.execute(sock, msg, commandText, helpers);
         return true; // found and execute
     }
     return false; // no command

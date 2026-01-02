@@ -1,18 +1,19 @@
 const axios = require('axios');
+const config = require('../config.js');
 
 module.exports.command = {
     name: 'tts',
-    aliases: ['konus', 'soyle', 'speak'],
-    description: 'Converts text to speech. Example: !speak en Hello World',
+    aliases: ['speak', 'speech', 'konus', 'soyle'],
+    description: 'action_tts_desc',
     usage: '[lang_code] <text>' // lang optional
 };
 
 // ai action name
 module.exports.actionName = 'send_voice_message';
 
-module.exports.execute = async function(sock, msg, params) {
+module.exports.execute = async function(sock, msg, params, helpers) {
     let textToSpeak = '';
-    let lang = 'en'; // default lang
+    let lang = config.LANGUAGE; // default lang
 
     // command or ai?
     if (typeof params === 'string') {
@@ -32,7 +33,7 @@ module.exports.execute = async function(sock, msg, params) {
     }
 
     if (!textToSpeak) {
-        await sock.sendMessage(msg.key.remoteJid, { text: "You didn't write what you wanted me to say." });
+        await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_tts_error_usage') });
         return;
     }
 
@@ -53,10 +54,10 @@ module.exports.execute = async function(sock, msg, params) {
 
     } catch (error) {
         console.error("❌ TTS Error:", error.message);
-        if (error.response && error.response.status === 404) {
-             await sock.sendMessage(msg.key.remoteJid, { text: `"${lang}" I don't support the this language code or you typed it incorrectly.. 🤷‍♂️` });
+        if (error.response && error.response.status === 400) {
+             await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_tts_error_lang', {lang: lang}) });
         } else {
-            await sock.sendMessage(msg.key.remoteJid, { text: "I have a problem with my vocal cords, I can't speak right now. 🤒" });
+            await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_tts_error_general') });
         }
     }
 };
