@@ -5,8 +5,10 @@ const pino = require('pino');
 // call modules
 const agent = require('./src/agent');
 const config = require('./src/config');
-const actionHandler = require('./src/actions'); 
+const { handleAIAction, handleCommand } = require('./src/actions/index.js');
 const logger = require('./src/utils/logger');
+const repl = require('./src/repl/index.js'); // REPL manager
+
 
 async function connect() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_session');
@@ -28,6 +30,7 @@ async function connect() {
             if (shouldReconnect) connect();
         } else if (connection === 'open') {
             console.log(`✅ Bot READY! Model: ${config.GEMINI_MODEL}`);
+            repl.start(sock); // start terminal command listening
         }
     });
 
@@ -44,6 +47,24 @@ async function connect() {
 
             const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text;
             if (!body) return;
+
+
+            // --- prefix control ---
+            const prefix = config.prefix;
+            if (body.startsWith(prefix)) {
+
+                const args = body.slice(prefix.length).trim().split(/ +/);
+                const commandName = args.shift().toLowerCase();
+                
+                console.log(`-⚡ Command: ${commandName}`);
+                await handleCommand(sock, msg, commandName, args);
+                
+                // finish
+                return; 
+            }
+            // --- end prefix control ---
+
+
 
             // 2. ai analysis
             const senderName = msg.pushName || "Unknown User";
@@ -74,7 +95,7 @@ async function connect() {
 
             // 5. direct the action (if any)
             if (aiDecision.action) {
-                await actionHandler.handleAction(sock, msg, aiDecision.action);
+                await handleAIAction(sock, msg, aiDecision.action);
             }
 
         } catch (err) {

@@ -26,6 +26,7 @@ function loadPrompt(fileName) {
     }
 }
 
+const actionsPrompt = loadPrompt('actions.prompt');
 const corePrompt = loadPrompt('core.prompt');
 const personaPrompt = loadPrompt('persona.prompt');
 
@@ -42,5 +43,7 @@ module.exports = {
         maxDelay: 10000,
     },
 
-    SYSTEM_PROMPT: `${corePrompt}\n\n${personaPrompt}`,
+    prefix: '!', // prefix for commands
+
+    SYSTEM_PROMPT: `${corePrompt}\n\n${actionsPrompt}\n\n${personaPrompt}`,
 };
