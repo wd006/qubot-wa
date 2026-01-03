@@ -24,7 +24,7 @@ The primary goal of QuBot WA is to break the mold of traditional, spammy WhatsAp
 - **Context-Aware:** It understands the flow of conversation and decides to engage only when it's appropriate and valuable.
 - **Human-like Interaction:** It uses dynamically calculated typing delays and a distinct personality defined by external prompt files.
 - **Action-Oriented:** It's not just a chatbot. It's an agent capable of performing tasks like setting reminders, searching the web, and more.
-- **Fully Customizable:** You can customize the bot's personality as you wish using the `persona.promt` file.
+- **Fully Customizable:** You can customize the bot's personality as you wish using the `persona.prompt` file.
 
 
 ## 🚀 Key Features
