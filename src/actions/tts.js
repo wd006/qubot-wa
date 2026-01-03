@@ -1,63 +1,63 @@
-const axios = require('axios');
-const config = require('../config.js');
+// src/actions/tts.js
 
 module.exports.command = {
     name: 'tts',
     aliases: ['speak', 'speech', 'konus', 'soyle'],
     description: 'action_tts_desc',
-    usage: '[lang_code] <text>' // lang optional
+    usage: '[dil_kodu] <metin>'
 };
 
-// ai action name
 module.exports.actionName = 'send_voice_message';
 
-module.exports.execute = async function(sock, msg, params, helpers) {
-    let textToSpeak = '';
-    let lang = config.LANGUAGE; // default lang
+module.exports.execute = async function (sock, msg, params, app) {
+    const { axios } = app.lib;
+    const { t } = app.utils;
 
-    // command or ai?
+    let textToSpeak = '';
+    let lang = app.config.LANGUAGE; // default lang from config
+
     if (typeof params === 'string') {
-        // !tts en Hello -> from user
+        // !tts en Hello world -> from user
         let args = params.split(' ');
-        
-        // is the language code specified?
+
+        // find language code
         if (args.length > 1 && args[0].length === 2) {
-            lang = args.shift(); // set lang
+            lang = args.shift();
         }
-        textToSpeak = args.join(' '); // text
-        
+        textToSpeak = args.join(' ');
+
     } else {
-        // { text: "...", lang: "..." } -> from ai
+        // { text: "Hello world", lang: "en" } -> from ai
         textToSpeak = params.text;
-        lang = params.lang || lang; // if it's not exist, use default
+        lang = params.lang || lang;
     }
 
     if (!textToSpeak) {
-        await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_tts_error_usage') });
+        await sock.sendMessage(msg.key.remoteJid, { text: t('action_tts_error_usage') });
         return;
     }
 
     try {
-        // Create a Google Translate URL using dynamic 'lang'.
+        // Google Translate TTS API 
         const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(textToSpeak)}&tl=${lang}&client=tw-ob`;
-        
+
         const response = await axios.get(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0' },
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' },
             responseType: 'arraybuffer'
         });
 
         await sock.sendMessage(msg.key.remoteJid, {
             audio: Buffer.from(response.data),
             mimetype: 'audio/ogg; codecs=opus',
-            ptt: true
+            ptt: false // like voice record
         });
 
     } catch (error) {
         console.error("❌ TTS Error:", error.message);
         if (error.response && error.response.status === 400) {
-             await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_tts_error_lang', {lang: lang}) });
+            await sock.sendMessage(msg.key.remoteJid, { text: t('action_tts_error_lang', { lang }) });
         } else {
-            await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_tts_error_general') });
+            await sock.sendMessage(msg.key.remoteJid, { text: t('action_tts_error_general') });
         }
     }
 };

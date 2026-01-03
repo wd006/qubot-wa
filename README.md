@@ -24,6 +24,7 @@ The primary goal of QuBot WA is to break the mold of traditional, spammy WhatsAp
 - **Context-Aware:** It understands the flow of conversation and decides to engage only when it's appropriate and valuable.
 - **Human-like Interaction:** It uses dynamically calculated typing delays and a distinct personality defined by external prompt files.
 - **Action-Oriented:** It's not just a chatbot. It's an agent capable of performing tasks like setting reminders, searching the web, and more.
+- **Fully Customizable:** You can customize the bot's personality as you wish using the `persona.promt` file.
 
 
 ## 🚀 Key Features
@@ -44,7 +45,7 @@ The primary goal of QuBot WA is to break the mold of traditional, spammy WhatsAp
 
 - **Runtime:** Node.js `(recommend v22)`
 - **WhatsApp API:** [@whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys)
-- **LLM Engine:** Google Gemini (`@google/generative-ai`) / Groq (soon) (`groq-sdk`)
+- **LLM Engine:** Google Gemini (`@google/generative-ai`) / Mistral AI
 - **Configuration:** `dotenv`
 - **Database (Planned):** `better-sqlite3` for memory and tasks.
 - **Job Queue (Planned):** For scheduled tasks like reminders.
@@ -84,12 +85,13 @@ The project is evolving. Here are the next major milestones:
     -   Create a `.env` file in the root directory.
     -   Add your API keys and phone number:
         ```env
-        GEMINI_KEY=your_google_ai_api_key
+        GEMINI_KEY=PASTE_YOUR_GOOGLE_API_KEY_HERE
+        MISTRAL_KEY=PASTE_YOUR_MISTRAL_API_KEY_HERE
         OWNER_NUMBER=xxxxxxxxx@s.whatsapp.net
         ```
 
 4.  **Customize the prompts:**
-    -   Edit `persona.prompt` to shape its personality and rules.
+    -   Create and edit `persona.prompt` to shape its personality and rules.
 
 5.  **Run the bot:**
     ```bash

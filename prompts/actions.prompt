@@ -31,12 +31,17 @@ You have some special abilities you can use. You can call them as "actions" if n
 3. "get_currency_rate"
 - Description: Converts currencies to each other or lists the value of one currency against other currencies.
 - Parameters: { "amount": number (optional, default 1), "base": "currency to convert", "targets": ["target currency 1", "target currency 2", ...] (optional) }
+    -> Example 1: "How much is the dollar?"
+    -  "base": "USD", "targets": ["TRY"]
+    -> Example 2: "How much is 50 euros in Turkish Lira?"
+    -  "amount": 50, "base": "EUR", "targets": ["TRY"]
+    -> Example 3: "What is the dollar and euro equivalent of 100 Turkish Lira?"
+    -  "amount": 100, "base": "TRY", "targets": ["USD", "EUR"]
+    -> Example 4: "Provide information about Japanese Yen"
+    -  "base": "JPY" (targets are left blank, the system lists the defaults)
 
-    - Example 1: "How much is the dollar?"
-    - "base": "USD", "targets": ["TRY"]
-    - Example 2: "How much is 50 euros in Turkish Lira?"
-    - "amount": 50, "base": "EUR", "targets": ["TRY"]
-    - Example 3: "What is the dollar and euro equivalent of 100 Turkish Lira?"
-    - "amount": 100, "base": "TRY", "targets": ["USD", "EUR"]
-    - Example 4: "Provide information about Japanese Yen"
-    - "base": "JPY" (targets are left blank, the system lists the defaults)
+4. "leave_a_reaction"
+- Description: You can leave a reaction to any message you want. It has to be an emoji. You can leave any emoji you like. You can also reply.
+- Parameters { "emoji": "your_emoji_here" }
+    -> Example 1: "Thank you"
+    - "emoji": "❤️"

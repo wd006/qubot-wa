@@ -1,42 +1,24 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const config = require('./config');
 const helpers = require('./utils');
-
-// launch ai service
-const genAI = new GoogleGenerativeAI(config.GEMINI_KEY);
-const model = genAI.getGenerativeModel({ 
-    model: config.GEMINI_MODEL,
-    generationConfig: {
-        responseMimeType: "application/json" // Native JSON mode
-    }
-});
-
-// Helper: JSON Cleaner
-function cleanJson(text) {
-    // it cleans up any markdown code blocks, if any. (```json ... ```)
-    return text.replace(/```json|```/g, '').trim();
-}
+const gemini = require('./services/gemini');
+const mistral = require('./services/mistral');
 
 async function processMessage(userMessage, senderName) {
+
+    const finalPrompt = `Username: ${senderName}\nMessage: "${userMessage}"`;
+
     try {
-        // prepare prompt
-        const finalPrompt = `${config.SYSTEM_PROMPT}
-
-Username: ${senderName}
-Message: "${userMessage}"`;
-
-        // send request
-        const result = await model.generateContent(finalPrompt);
-        const rawResponse = result.response.text();
-
-        // parse and return
-        const jsonResponse = JSON.parse(cleanJson(rawResponse));
-        return jsonResponse;
-
+        if (config.AI_PROVIDER === 'mistral') {
+            console.log("🧠 Mistral AI...");
+            return await mistral.getResponse(finalPrompt);
+        } else {
+            // gemini: default
+            console.log("🧠 Gemini AI...");
+            const geminiPrompt = `${config.SYSTEM_PROMPT}\n\n${finalPrompt}`;
+            return await gemini.getResponse(geminiPrompt);
+        }
     } catch (error) {
-        console.error("❌ Agent Error:", error.message);
-        
-        // if there is an error, return safe answer
+        console.error(`❌ ${config.AI_PROVIDER.toUpperCase()} Agent Error:`, error.message);
         return { 
             should_reply: true,
             reply_text: helpers.t('general_error'), 

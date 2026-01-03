@@ -9,6 +9,10 @@
   "action_currency_error_targetNotFound": "I couldn't find the target exchange rates you mentioned.",
   "action_currency_error_baseNotFound": "I couldn't find a currency code called \"{code}\". 🤷‍♂️",
 
+  "action_reaction_desc": "Reacts to the replied message.",
+  "action_reaction_error_general": "There was a problem adding the emoji.",
+  "action_reaction_error_usage": "You used the wrong format. You must provide exactly 1 emoji.",
+
   "action_tts_desc": "Converts text to speech. Example: !speak en Hello World",
   "action_tts_error_general": "There's an issue with my voice box, I can't speak right now. 🤒",
   "action_tts_error_usage": "You didn't write what you want me to say.",
@@ -24,5 +28,9 @@
 
   "repl_groups_desc": "Lists all the groups the bot is a part of.",
   "repl_help_desc": "Lists all commands.",
-  "repl_say_desc": "It sends a message to the specified address."
+  "repl_say_desc": "It sends a message to the specified address.",
+
+  "service_ai_error_general": "Cannot connect to the AI Provider. Please try again later.",
+  "service_ai_error_apiKey": "My API key is invalid or incorrectly configured.",
+  "service_ai_error_rateLimit": "I hit the API rate limit, I need to rest a bit."
 }

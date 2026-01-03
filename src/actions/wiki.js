@@ -1,23 +1,22 @@
-const axios = require('axios');
-const config = require('../config.js');
+// src/actions/wiki.js
 
 module.exports.command = {
     name: 'wiki',
-    aliases: ['wikipedia', 'bilgi', 'info'],
+    aliases: ['wikipedia', 'bilgi', 'info', 'nedir'],
     description: 'action_wiki_desc'
 };
 
-// ai action name
 module.exports.actionName = 'wikipedia_search';
 
-
-module.exports.execute = async function(sock, msg, params, helpers) {
+module.exports.execute = async function(sock, msg, params, app) {
+    const { axios } = app.lib;
+    const { t } = app.utils;
+    const { LANGUAGE } = app.config;
 
     const query = typeof params === 'string' ? params : params.query;
-    const lang = config.LANGUAGE;
 
     if (!query) {
-        await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_wiki_error_usage') });
+        await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_usage') });
         return;
     }
 
@@ -26,19 +25,21 @@ module.exports.execute = async function(sock, msg, params, helpers) {
     };
 
     try {
-        // search
-        const searchUrl = `https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&namespace=0&format=json`;
+        // search and find full title
+        const searchUrl = `https://${LANGUAGE}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&namespace=0&format=json`;
         const searchResponse = await axios.get(searchUrl, { headers });
         
+        // Opensearch answer: [query, [Title], [Desc], [Link]]
         const pageTitle = searchResponse.data[1][0];
+        const pageLink = searchResponse.data[3][0];
         
         if (!pageTitle) {
-            await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_wiki_error_notFound') });
+            await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_notFound', {'query': query}) });
             return;
         }
 
-        // get summary
-        const summaryUrl = `https://${lang}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&redirects=1&format=json&titles=${encodeURIComponent(pageTitle)}`;
+        // fetch summary text
+        const summaryUrl = `https://${LANGUAGE}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&redirects=1&format=json&titles=${encodeURIComponent(pageTitle)}`;
         const summaryResponse = await axios.get(summaryUrl, { headers });
         
         const pages = summaryResponse.data.query.pages;
@@ -46,22 +47,23 @@ module.exports.execute = async function(sock, msg, params, helpers) {
         const extract = pages[pageId].extract;
 
         if (!extract) {
-            await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_wiki_error_summary') });
+            await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_summary') });
             return;
         }
         
-        // result
+        // output
         const resultText = `
-📖 *${helpers.t('action_wiki_header')}: ${pageTitle}*
+📖 *${t('action_wiki_header', { title: pageTitle })}*
 
-${extract.substring(0, 500)}...
+${extract.substring(0, 500)}${extract.length > 500 ? '...' : ''}
 
-${helpers.t('action_wiki_goLink')}: ${searchResponse.data[3][0]}`;
+*${t('action_wiki_goLink')}:*
+_🔗 ${pageLink || ''}_`;
 
         await sock.sendMessage(msg.key.remoteJid, { text: resultText.trim() });
 
     } catch (error) {
         console.error("❌ Wikipedia Error:", error.message);
-        await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_wiki_error_general') });
+        await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_general') });
     }
 };

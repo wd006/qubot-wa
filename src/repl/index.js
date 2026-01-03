@@ -13,7 +13,7 @@ function loadCommands() {
 
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file);
-        // CommonJS'de dinamik yükleme için require kullanılır.
+        // CommonJS -> require
         const command = require(filePath);
         if (command.name) {
             commands.set(command.name, command);

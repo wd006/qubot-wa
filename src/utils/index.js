@@ -1,12 +1,13 @@
+// src/utils/index.js
 const logger = require('./logger');
-const l10n = require('./l10n');
+const l10nLoader = require('./l10n');
 
-module.exports = {
-    // from logger.js
-    logIncomingMessage: logger.logIncomingMessage,
-    logAIDecision: logger.logAIDecision,
-    logAction: logger.logAction,
+module.exports = (app) => {
+    // load l10n with 'app'
+    const l10n = l10nLoader(app);
 
-    // from l10n.js
-    t: l10n.t,
+    return {
+        ...logger, // logIncomingMessage and logAIDecision
+        t: l10n.t  // t (l10n)
+    };
 };

@@ -1,33 +1,35 @@
-const fs = require('fs');
-const path = require('path');
-const config = require('../config');
+// src/utils/l10n.js
 
-// caching
-let translations = {};
+module.exports = (app) => {
+    const { fs, path } = app.lib;
+    const langCode = app.config.LANGUAGE || 'en'; // if not set
+    let translations = {};
 
-try {
-    const langFilePath = path.join(__dirname, `../../locales/${config.LANGUAGE}.json`);
-    translations = JSON.parse(fs.readFileSync(langFilePath, 'utf8'));
-    console.log(`✅ Language loaded: ${config.LANGUAGE}.json`);
-} catch (error) {
-    console.error(`❌ CRITIC ERROR: ${config.LANGUAGE}.json language file could not be read!`, error);
-    // To prevent the bot from crashing in case of an error, continue with an empty object.
-}
-
-/**
- * It retrieves the translation of the specified key and fills in the placeholders.
- * @param {string} key - lang_code.json the key inside (e.g., 'error_tts_general')
- * @param {object} [placeholders={}] - Dynamic values ​​to be modified (e.g., { lang: 'de' })
- * @returns {string} Translated text
- */
-function t(key, placeholders = {}) {
-    let text = translations[key] || key; // Eğer anahtar yoksa, anahtarın kendisini döndür (hata ayıklama için)
-
-    for (const placeholder in placeholders) {
-        text = text.replace(`{${placeholder}}`, placeholders[placeholder]);
+    try {
+        // project_root/locales/lang.json
+        const langPath = path.join(app.root, 'locales', `${langCode}.json`);
+        
+        if (fs.existsSync(langPath)) {
+            const rawData = fs.readFileSync(langPath, 'utf8');
+            translations = JSON.parse(rawData);
+            console.log(`🗣️  Language: ${langCode}`);
+        } else {
+            console.warn(`⚠️  WARN: Language file not found (${langCode}.json). Defaults will be used.`);
+        }
+    } catch (error) {
+        console.error("❌ Language loading error:", error.message);
     }
-    
-    return text;
-}
 
-module.exports = { t };
+    // translate
+    function t(key, placeholders = {}) {
+        let text = translations[key] || key; // return key if no value exists.
+        
+        for (const ph in placeholders) {
+            text = text.replace(`{${ph}}`, placeholders[ph]);
+        }
+        return text;
+    }
+
+    // return an object (includes t func)
+    return { t };
+};

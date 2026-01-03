@@ -1,52 +1,36 @@
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
 
-/**
- * It reads the specified prompt file, cleans up HTML comments, and returns the content.
- * @param {string} fileName - The name of the file in the prompts folder (e.g., 'core.prompt')
- * @returns {string} File contents or error message.
- */
-function loadPrompt(fileName) {
-    try {
-        const filePath = path.join(__dirname, `../prompts/${fileName}`);
-        
-        const rawContent = fs.readFileSync(filePath, 'utf8');
-        
-        // <!-- cleaner --> regex
-        const cleanContent = rawContent.replace(/<!--[\s\S]*?-->/g, '').trim();
-        
-        console.log(`✅ Prompt loaded: ${fileName}`);
-        
-        return cleanContent;
-
-    } catch (error) {
-        console.error(`❌ ERROR: ${fileName} file could not be read! Please check if the file exists.`, error.message);
-        return null;
-    }
-}
-
-const actionsPrompt = loadPrompt('actions.prompt');
-const corePrompt = loadPrompt('core.prompt');
-const personaPrompt = loadPrompt('persona.prompt');
-
-module.exports = {
+const config = {
 
     LANGUAGE: 'en',
+    LOCALE: 'en-US',
 
-    GEMINI_KEY: process.env.GEMINI_KEY,
-    GEMINI_MODEL: "gemini-flash-latest",
-    ALLOWED_NUMBERS: process.env.OWNER_NUMBER ? [process.env.OWNER_NUMBER] : [],
+    PREFIX: '!',
+    OWNER_NUMBER: process.env.OWNER_NUMBER,
+
+
+    AI: {
+        activeProvider: 'gemini', // ['gemini', 'mistral']
+
+        mistral: {
+            apiKey: process.env.MISTRAL_KEY,
+            model: "open-mixtral-8x7b" // ['open-mistral-7b', 'open-mixtral-8x7b']
+        },
+        gemini: {
+            apiKey: process.env.GEMINI_KEY,
+            model: "gemini-2.0-flash" // ['gemini-flash-latest', 'gemini-2.0-flash']
+        },
+    },
 
     // typing effect
-    composing: {
-        animation: true,
+    COMPOSING: {
+        enabled: true,
         charPerSec: 10,
         minDelay: 2000,
         maxDelay: 10000,
     },
 
-    prefix: '!', // prefix for commands
-
-    SYSTEM_PROMPT: `${corePrompt}\n\n${actionsPrompt}\n\n${personaPrompt}`,
+    SYSTEM_PROMPT: "" // must be blank
 };
+
+module.exports = config;

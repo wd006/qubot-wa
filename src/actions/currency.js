@@ -1,36 +1,40 @@
-const axios = require('axios');
+// src/actions/currency.js
 
 module.exports.command = {
     name: 'currency',
     aliases: ['kur', 'cevir', 'doviz', 'rate'],
     description: 'action_currency_desc',
-    usage: '[amount] [based_rate] [target_rate]'
+    usage: '[amount] [base] [target(s)]'
 };
 
 // ai action name
 module.exports.actionName = 'get_currency_rate';
 
-module.exports.execute = async function (sock, msg, params, helpers) {
+module.exports.execute = async function (sock, msg, params, app) {
+    // get params from app
+    const { axios } = app.lib;
+    const { t } = app.utils;
+    const { LANGUAGE } = app.config;
+    // const currentLocale = LOCALE || LANGUAGE || 'en-US';
+
     let amount = 1.0;
     let baseCurrency = 'USD';
     let targetCurrencies = [];
 
-    // --- INPUT ANALYSIS ---
-    // This block safely sets variables based on the type of input.
     try {
         if (typeof params === 'string') {
             // !currency 50 EUR TRY -> from user
-            let args = params.toUpperCase().split(' ').filter(Boolean); // removes empty elements
+            let args = params.toUpperCase().split(' ').filter(Boolean);
 
-            // amount control
+            // 1st param
             if (args.length > 0 && !isNaN(parseFloat(args[0]))) {
                 amount = parseFloat(args.shift());
             }
-            // based rate control
+            // 2nd param -> base
             if (args.length > 0) {
                 baseCurrency = args.shift();
             }
-            // target rates control
+            // other params -> (target)
             targetCurrencies = args;
 
         } else if (typeof params === 'object' && params !== null) {
@@ -39,23 +43,21 @@ module.exports.execute = async function (sock, msg, params, helpers) {
             baseCurrency = (params.base || 'TRY').toUpperCase();
             targetCurrencies = params.targets || [];
 
-            // clear if AI sends an empty array -> ['']
+            // clear empty params
             targetCurrencies = targetCurrencies.map(code => code.toUpperCase()).filter(Boolean);
         }
 
-        // if there is no target exchange rate use the defaults
+        // use defaults
         if (targetCurrencies.length === 0) {
-            targetCurrencies = ['USD', 'EUR', 'GBP', 'JPY'];
+            targetCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'TRY'];
         }
     } catch (parseError) {
-        console.error("❌ An error occurred while parsing the parameter:", parseError);
-        //logger.logAction(this.actionName || this.command.name, 'Parser', params, false, parseError.message);
-        await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_currency_error_params') });
+        console.error("❌ Parameter parsing error:", parseError);
+        await sock.sendMessage(msg.key.remoteJid, { text: t('action_currency_error_usage') });
         return;
     }
-    // --- END ANALYSIS ---
 
-    // --- API REQUEST AND ANSWERING ---
+    // api request and answering
     try {
         const apiUrl = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
         const response = await axios.get(apiUrl);
@@ -63,52 +65,44 @@ module.exports.execute = async function (sock, msg, params, helpers) {
         const rates = response.data.rates;
         const date = new Date(response.data.date).toLocaleDateString('en-EN');
 
-        let resultText = `📈 *${helpers.t('action_currency_header')} (${date})*\n\n`;
+        let resultText = `📈 *${t('action_currency_header')} (${date})*\n\n`;
         let foundAny = false;
+
+        const emojiMap = {
+            'TRY': '🇹🇷', 'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧',
+            'JPY': '🇯🇵', 'CNY': '🇨🇳', 'RUB': '🇷🇺', 'AZN': '🇦🇿',
+            'CAD': '🇨🇦', 'AUD': '🇦🇺'
+        };
 
         targetCurrencies.forEach(targetCode => {
             const rate = rates[targetCode];
             if (rate) {
-                const convertedValue = (amount * rate).toFixed(4);
-                const emoji = { 
-                    TRY: '🇹🇷', 
-                    USD: '🇺🇸', 
-                    EUR: '🇪🇺', 
-                    GBP: '🇬🇧', 
-                    JPY: '🇯🇵' }
-                    [targetCode] || '💰';
+                const convertedValue = (amount * rate).toFixed(5); // 2 decimal places
+                const emoji = emojiMap[targetCode] || '💰';
+                
                 resultText += `${emoji} *${amount} ${baseCurrency}* = ${convertedValue} ${targetCode}\n`;
                 foundAny = true;
             }
         });
 
-        // if none of the requested exchange rates are available
         if (!foundAny) {
-            console.log("could not be found");
-            //logger.logAction(this.actionName || this.command.name, 'API', { baseCurrency, targetCurrencies }, false, 'The specified target exchange rates could not be found.');
             if (typeof params === 'string') {
-                await sock.sendMessage(msg.key.remoteJid, { text: helpers.t('action_currency_error_targetNotFound') });
+                await sock.sendMessage(msg.key.remoteJid, { text: t('action_currency_error_targetNotFound') });
             }
             return;
         }
 
-        // success
-        console.log("currency success");
-        //logger.logAction(this.actionName || this.command.name, typeof params === 'string' ? 'Command' : 'AI', params, true);
-
         await sock.sendMessage(msg.key.remoteJid, { text: resultText.trim() });
 
     } catch (error) {
-        let errorMessage = helpers.t('action_currency_error_general');
+        console.error("Currency API Error:", error.message);
+        
+        let errorMessage = t('action_currency_error_general');
         if (error.response && error.response.status === 404) {
-            errorMessage = helpers.t('action_currency_error_baseNotFound', {'code': baseCurrency});
+            errorMessage = t('action_currency_error_baseNotFound', { code: baseCurrency });
         }
 
-        // error
-        console.log("currency error");
-        //logger.logAction(this.actionName || this.command.name, typeof params === 'string' ? 'Command' : 'AI', params, false, error.message);
-
-        // not ai error
+        // If it's a user message, then it will give an error.
         if (typeof params === 'string') {
             await sock.sendMessage(msg.key.remoteJid, { text: errorMessage });
         }

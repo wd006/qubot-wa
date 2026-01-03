@@ -1,68 +1,48 @@
-const fs = require('fs');
-const path = require('path');
-const helpers = require('../utils');
+// src/actions/index.js
 
-const actionMap = new Map(); // keeps the AI ​​action names.
-const commandMap = new Map(); // keeps the classic command names.
+module.exports = (app) => {
+    const { fs, path } = app.lib;
+    
+    const actionMap = new Map();
+    const commandMap = new Map();
 
-/**
- * It scans all the files in the actions folder and populates the maps.
- */
-function loadActions() {
-    const actionsPath = path.join(__dirname);
-    const actionFiles = fs.readdirSync(actionsPath).filter(file => file.endsWith('.js') && file !== 'index.js');
+    // this dir
+    const actionsDir = __dirname;
+    
+    // get all .js files (exclude index)
+    const files = fs.readdirSync(actionsDir).filter(file => file.endsWith('.js') && file !== 'index.js');
 
-    for (const file of actionFiles) {
-        const filePath = path.join(actionsPath, file);
-        const actionModule = require(filePath);
+    console.log(`📂 Scanning actions... (${files.length} file)`);
 
-        // fill the AI ​​Action Map
+    for (const file of files) {
+        const filePath = path.join(actionsDir, file);
+        
+        // dynamic
+        const actionModule = require(filePath); 
+
+        // add to ai action map
         if (actionModule.actionName) {
             actionMap.set(actionModule.actionName, actionModule);
         }
 
-        // fill the classic command map
+        // add to prefixied command map
         if (actionModule.command) {
-            const cmd = actionModule.command;
+            const cmdName = actionModule.command.name.toLowerCase();
+            commandMap.set(cmdName, actionModule);
 
-            // add main command name
-            commandMap.set(cmd.name.toLowerCase(), actionModule);
-
-            // add aliases
-            if (cmd.aliases && Array.isArray(cmd.aliases)) {
-                cmd.aliases.forEach(alias => commandMap.set(alias.toLowerCase(), actionModule));
+            // add the aliases as well
+            if (actionModule.command.aliases) {
+                actionModule.command.aliases.forEach(alias => {
+                    commandMap.set(alias.toLowerCase(), actionModule);
+                });
             }
         }
     }
-    console.log(`✅ ${actionMap.size} AI action and ${commandMap.size} command loaded.`);
-}
 
-/**
- * It executes the action dictated by the AI.
- */
-async function handleAIAction(sock, msg, actionData) {
-    if (!actionData || !actionData.type) return;
+    console.log(`✅ ${actionMap.size} AI actions and ${commandMap.size} commands have been loaded.`);
 
-    const handler = actionMap.get(actionData.type);
-    if (handler) {
-        await handler.execute(sock, msg, actionData.params, helpers);
-    }
-}
-
-/**
- * It executes the command that comes with the prefix.
- */
-async function handleCommand(sock, msg, commandName, args) {
-    const handler = commandMap.get(commandName);
-    if (handler) {
-        const commandText = args.join(' ');
-        await handler.execute(sock, msg, commandText, helpers);
-        return true; // found and execute
-    }
-    return false; // no command
-}
-
-// load in start
-loadActions();
-
-module.exports = { handleAIAction, handleCommand };
+    return {
+        actions: actionMap,
+        commands: commandMap
+    };
+};
