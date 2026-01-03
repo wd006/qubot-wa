@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/wd006/qubot-wa/compare/v1.2.0...v2.0.0) (2026-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** The config.js structure has been changed.
+- Configuration Overhaul: The 'src/config.js' structure has been
+  completely reorganized to support multiple AI providers.
+- Action Required: Old configuration files are NOT compatible. Please
+  update your config to match the new 'AI: { ... }' object structure.
+
+### Features
+
+* **core:** reactions, Mistral AI, refactoring ([24a780f](https://github.com/wd006/qubot-wa/commit/24a780f0895ae275cbf2de2d509cdd51833f4edd))
+
 ## [1.2.0](https://github.com/wd006/qubot-wa/compare/v1.1.0...v1.2.0) (2026-01-02)
 
 
