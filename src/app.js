@@ -16,37 +16,14 @@ const app = {
     actions: {},  // ai actions (currency, wiki...)
     commands: {}, // prefix commands (!currency, !wiki...)
     utils: {},    // helpers (l10n, logger...)
-    prompts: {}   // prompt files (*.prompt)
-};
-
-// load prompts
-function loadPrompt(fileName) {
-    try {
-        const filePath = path.join(app.root, 'prompts', fileName);
-        if (!fs.existsSync(filePath)) return ''; 
-        
-        const content = fs.readFileSync(filePath, 'utf8');
-        return content.replace(/<!--[\s\S]*?-->/g, '').trim();
-    } catch (error) {
-        console.error(`⚠️ Prompt read error: ${fileName}`, error.message);
-        return '';
+    prompts: {},   // prompt files (*.prompt)
+    cache: {
+        groupNames: new Map()
     }
-}
+};
 
 console.log('🔄 System is loading...');
 console.log(`📢 Prefix: ${app.config.PREFIX}`);
-
-// save prompts
-app.prompts.core = loadPrompt('core.prompt');
-app.prompts.actions = loadPrompt('actions.prompt');
-app.prompts.persona = fs.existsSync(path.join(app.root, 'prompts', 'persona.prompt'))
-    ? loadPrompt('persona.prompt')
-    : loadPrompt('persona.prompt.example'); // if the user did not change file name
-
-// combine system prompts
-app.config.SYSTEM_PROMPT = `${app.prompts.core}\n\n${app.prompts.actions}\n\n${app.prompts.persona}`;
-
-console.log('✅ Prompts are ready.');
 
 // load utils
 console.log('🔄 Utils are loading...');

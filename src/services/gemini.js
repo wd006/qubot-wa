@@ -2,9 +2,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = (app) => {
-    const { config } = app;
     const { t } = app.utils;
-    
     const geminiConfig = app.config.AI.gemini;
 
     const genAI = new GoogleGenerativeAI(geminiConfig.apiKey);
@@ -13,15 +11,15 @@ module.exports = (app) => {
         generationConfig: { responseMimeType: "application/json" }
     });
 
-    async function getResponse(userMessage) {
+    async function getResponse(richPrompt) {
         try {
-            // system prompt + message
-            const fullPrompt = `${config.SYSTEM_PROMPT}\n\nUser Message: ${userMessage}`;
+            // merge all
+            const fullPrompt = `${app.utils.prompt.getSystemPrompt()}\n\n${richPrompt}`;
 
             const result = await model.generateContent(fullPrompt);
             const rawResponse = result.response.text();
 
-            // clear markdown (```json ... ```)
+            // md clean
             const cleaned = rawResponse.replace(/```json|```/g, '').trim();
             
             return JSON.parse(cleaned);

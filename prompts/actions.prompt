@@ -41,7 +41,10 @@ You have some special abilities you can use. You can call them as "actions" if n
     -  "base": "JPY" (targets are left blank, the system lists the defaults)
 
 4. "leave_a_reaction"
-- Description: You can leave a reaction to any message you want. It has to be an emoji. You can leave any emoji you like. You can also reply.
-- Parameters { "emoji": "your_emoji_here" }
+- Description: Reacts to a message with an emoji. You can leave a reaction to any message you want. It has to be an emoji. You can leave any emoji you like. You can also reply.
+- Parameters:
+    - `emoji` (string): A single emoji character (e.g., "👍", "❤️", "😂").
+    - `message_id` (string, optional): The ID of the message to react to. If you want to react to the CURRENT message that triggered you, you can provide its ID. If you want to react to a REPLIED message, provide the replied message's ID. If left empty, it will react to the current message by default.
+    - Structure: { "emoji": "❤️", "message_id": "HSJHJWH7323HSJSJ" }
     -> Example 1: "Thank you"
     - "emoji": "❤️"

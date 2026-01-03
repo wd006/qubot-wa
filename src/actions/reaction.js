@@ -1,6 +1,7 @@
 // src/actions/reaction.js
 
 function isEmoji(str) {
+    if (!str) return false;
     const emojiRegex = /^(\p{Extended_Pictographic}|\p{Emoji_Presentation})/u;
     return emojiRegex.test(str);
 }
@@ -18,26 +19,45 @@ module.exports.execute = async function (sock, msg, params, app) {
     const { t } = app.utils;
 
     let emoji;
-
+    let targetMessageId = null;
 
     if (typeof params === 'string') {
-        emoji = params.trim(); // from user
-    } else {
-        emoji = params.emoji; // from ai
+        emoji = params.trim(); // !react ❤️ -> from user
+    } else if (params) {
+        emoji = params.emoji; // {emoji: "❤️"} -> from ai
+        targetMessageId = params.message_id; // target message id
     }
 
-    // is replied?
-    let targetKey = msg.key;
+    if (!emoji) return; // ignore empty emoji.
+
+    // defining the target message
+    let targetKey;
     const contextInfo = msg.message?.extendedTextMessage?.contextInfo;
 
-    if (contextInfo && contextInfo.stanzaId) {
+    // ai returned a target message.
+    if (targetMessageId) {
+        targetKey = {
+            remoteJid: msg.key.remoteJid,
+            id: targetMessageId
+        };
+        console.log(`🎯 AI Reaction (targeted): ${targetMessageId}`);
+    }
+    // user replied a message with !react [emoji]
+    else if (typeof params === 'string' && contextInfo && contextInfo.stanzaId) {
         targetKey = {
             remoteJid: msg.key.remoteJid,
             id: contextInfo.stanzaId,
             participant: contextInfo.participant
         };
+        console.log(`🎯 !react command (replied by user): ${contextInfo.stanzaId}`);
+    }
+    // ai did not specify a target message. target the trigger.
+    else {
+        targetKey = msg.key;
+        console.log(`🎯 AI Reaction (untargeted): ${msg.key.id}`);
     }
 
+    // do
     try {
         if (isEmoji(emoji)) {
             await sock.sendMessage(msg.key.remoteJid, {
@@ -47,14 +67,12 @@ module.exports.execute = async function (sock, msg, params, app) {
                 }
             });
         } else {
-            // If it's a user message, then it will give an error.
+            // if the user made a mistake, warn
             if (typeof params === 'string') {
                 await sock.sendMessage(msg.key.remoteJid, { text: t('action_reaction_invalid') });
             }
         }
-
     } catch (error) {
         console.error("❌ Reaction Error:", error.message);
-        await sock.sendMessage(msg.key.remoteJid, { text: t('action_reaction_error_general') });
     }
 };
