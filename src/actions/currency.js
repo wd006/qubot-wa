@@ -7,14 +7,11 @@ module.exports.command = {
     usage: '[amount] [base] [target(s)]'
 };
 
-// ai action name
 module.exports.actionName = 'get_currency_rate';
 
 module.exports.execute = async function (sock, msg, params, app) {
-    // get params from app
     const { axios } = app.lib;
-    const { t } = app.utils;
-    const log = app.utils.logger;
+    const { t, logger: log } = app.utils;
     const { LANGUAGE } = app.config;
 
     let amount = 1.0;
@@ -57,8 +54,14 @@ module.exports.execute = async function (sock, msg, params, app) {
         return;
     }
 
+    if (targetCurrencies.length === 0) {
+        targetCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'TRY'];
+    }
+
+
     // api request and answering
-    try {
+    try { // custom errors
+        
         const apiUrl = `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`;
         const response = await axios.get(apiUrl);
 
@@ -77,9 +80,8 @@ module.exports.execute = async function (sock, msg, params, app) {
         targetCurrencies.forEach(targetCode => {
             const rate = rates[targetCode];
             if (rate) {
-                const convertedValue = (amount * rate).toFixed(5); // 2 decimal places
+                const convertedValue = (amount * rate).toFixed(5);
                 const emoji = emojiMap[targetCode] || '💰';
-
                 resultText += `${emoji} *${amount} ${baseCurrency}* = ${convertedValue} ${targetCode}\n`;
                 foundAny = true;
             }
@@ -95,16 +97,15 @@ module.exports.execute = async function (sock, msg, params, app) {
         await sock.sendMessage(msg.key.remoteJid, { text: resultText.trim() });
 
     } catch (error) {
-        log.error('ACTIONS', "currency: API Error", error.message);
+        log.warn('ACTIONS', `currency: API request failed for base '${baseCurrency}'`, error.message);
 
-        let errorMessage = t('action_currency_error_general');
         if (error.response && error.response.status === 404) {
-            errorMessage = t('action_currency_error_baseNotFound', { code: baseCurrency });
-        }
-
-        // if it's a user message, then it will give an error.
-        if (typeof params === 'string') {
+            const errorMessage = t('action_currency_error_baseNotFound', { code: baseCurrency });
             await sock.sendMessage(msg.key.remoteJid, { text: errorMessage });
+
+        } else {
+            // unexpected error
+            throw error;
         }
     }
 };

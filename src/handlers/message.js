@@ -7,7 +7,7 @@ async function simulateTyping(sock, jid, text, config) {
     let typingDuration = (text.length / charPerSec) * 1000;
     typingDuration += Math.random() * 1000;
     typingDuration = Math.max(minDelay, Math.min(typingDuration, maxDelay));
-    
+
     await sock.sendPresenceUpdate('composing', jid);
     await delay(typingDuration);
     await sock.sendPresenceUpdate('paused', jid);
@@ -28,11 +28,11 @@ module.exports = async function handleMessage(sock, m, app) {
         const owner = app.config.OWNER_NUMBER;
         const sender = msg.key.participant || msg.key.remoteJid;
 
-        if (owner) { 
+        if (owner) {
             // compare only numbers
             if (sender.split('@')[0] !== owner.split('@')[0]) {
                 log.warn('AUTH', `🚫 Access Denied: Message from ${sender} is not from the owner.`);
-                return; 
+                return;
             }
         }
 
@@ -46,10 +46,16 @@ module.exports = async function handleMessage(sock, m, app) {
 
             if (commandHandler) {
                 log.info('CMD', `Command Triggered: ${commandName}`);
-                await commandHandler.execute(sock, msg, args.join(' '), app);
+                try {
+                    await commandHandler.execute(sock, msg, args.join(' '), app);
+                } catch (error) {
+                    log.error('CMD', `Command "${commandName}" failed`, error);
+                    await sock.sendMessage(msg.key.remoteJid, { text: app.utils.t('action_error_general') });
+                }
                 return;
             }
         }
+
 
         // --- AI REQUEST ---
 
@@ -68,7 +74,7 @@ module.exports = async function handleMessage(sock, m, app) {
         log.decision(aiDecision);
 
         // apply ai decision
-        
+
         // should_reply?
         if (aiDecision.should_reply && aiDecision.reply_text) {
             await simulateTyping(sock, msg.key.remoteJid, aiDecision.reply_text, app.config);
@@ -79,13 +85,19 @@ module.exports = async function handleMessage(sock, m, app) {
         if (aiDecision.action) {
             const actionHandler = app.actions.get(aiDecision.action.type);
             if (actionHandler) {
-                await actionHandler.execute(sock, msg, aiDecision.action.params, app);
+                try {
+                    await actionHandler.execute(sock, msg, aiDecision.action.params, app);
+    
+                } catch (error) {
+                    log.error('AI_ACTION', `Action "${aiDecision.action.type}" failed`, error);
+                    // ai error -> silent
+                }
             } else {
                 log.error('AI', 'AI requested a non-existent action:', (aiDecision.action.type));
             }
         }
 
     } catch (err) {
-        log.error("❌ Message Handler Error:", err);
+        log.error('SYSTEM', "❌ Message Handler Error:", err);
     }
 };

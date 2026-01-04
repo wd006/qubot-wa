@@ -2,7 +2,7 @@
 
 function isEmoji(str) {
     if (!str) return false;
-    const emojiRegex = /^(\p{Extended_Pictographic}|\p{Emoji_Presentation})/u;
+    const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/;
     return emojiRegex.test(str);
 }
 
@@ -16,71 +16,58 @@ module.exports.command = {
 module.exports.actionName = 'leave_a_reaction';
 
 module.exports.execute = async function (sock, msg, params, app) {
-    const { t } = app.utils;
-    const log = app.utils.logger;
+    const { t, logger: log } = app.utils;
 
     let emoji;
     let targetMessageId = null;
 
     if (typeof params === 'string') {
-        emoji = params.trim(); 
+        emoji = params.trim(); // !react 👍 -> from user
     } else if (params) {
-        emoji = params.emoji;
+        emoji = params.emoji; // { emoji: '👍', message_id: '...' } -> from ai
         targetMessageId = params.message_id;
     }
 
-    if (!emoji) return;
-
+    if (!emoji || !isEmoji(emoji)) {
+        // user wrong usage
+        if (typeof params === 'string') {
+            await sock.sendMessage(msg.key.remoteJid, { text: t('action_reaction_error_usage') });
+        }
+        return;
+    }
+    
+    // define target message
     let targetKey;
     const contextInfo = msg.message?.extendedTextMessage?.contextInfo;
 
-    // ai return with message_id
+    // ai returned a msdID
     if (targetMessageId) {
-        // targetMessage =? triggerMessage
-        if (targetMessageId === msg.key.id) {
-            targetKey = msg.key;
-        } else {
-            
-            targetKey = {
-                remoteJid: msg.key.remoteJid,
-                id: targetMessageId
-            };
-
-            if (contextInfo && contextInfo.stanzaId === targetMessageId) {
-                targetKey.participant = contextInfo.participant;
-            }
-        }
-        log.info('ACTIONS', 'react: AI Targeted', `Reacting to: ${targetMessageId}`);
+        targetKey = {
+            remoteJid: msg.key.remoteJid,
+            id: targetMessageId,
+            participant: msg.key.participant // for groups
+        };
+        log.info('ACTIONS', 'react: AI targeted a specific message', `ID: ${targetMessageId}`);
     }
-    // !react
-    else if (typeof params === 'string' && contextInfo && contextInfo.stanzaId) {
+    // user replied a msg
+    else if (contextInfo && contextInfo.stanzaId) {
         targetKey = {
             remoteJid: msg.key.remoteJid,
             id: contextInfo.stanzaId,
             participant: contextInfo.participant // for groups
         };
-        log.info('ACTIONS', 'react: User Replied with Command', `Reacting to: ${contextInfo.stanzaId}`);
+        log.info('ACTIONS', 'react: User replied with command', `ID: ${contextInfo.stanzaId}`);
     }
-    // no target, react to trigger msg
+    // no target -> use trigger msg
     else {
         targetKey = msg.key;
-        log.info('ACTIONS', 'react: AI Untargeted (Trigger Msg)', `Reacting to: ${msg.key.id}`);
+        log.info('ACTIONS', 'react: No target, reacting to trigger message', `ID: ${msg.key.id}`);
     }
-
-    try {
-        if (isEmoji(emoji)) {
-            await sock.sendMessage(msg.key.remoteJid, {
-                react: {
-                    text: emoji,
-                    key: targetKey
-                }
-            });
-        } else {
-            if (typeof params === 'string') {
-                await sock.sendMessage(msg.key.remoteJid, { text: t('action_reaction_error_usage') });
-            }
+    
+    await sock.sendMessage(msg.key.remoteJid, {
+        react: {
+            text: emoji,
+            key: targetKey
         }
-    } catch (error) {
-        log.error('ACTIONS', "react: An error occured", error.message);
-    }
+    });
 };
