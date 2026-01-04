@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/wd006/qubot-wa/compare/v2.1.0...v2.2.0) (2026-01-04)
+
+
+### Features
+
+* **core:** context parsing & critical logic fixes ([b121e00](https://github.com/wd006/qubot-wa/commit/b121e0062304a49f45e69e4262e538ea4b53fb20))
+
 ## [2.1.0](https://github.com/wd006/qubot-wa/compare/v2.0.0...v2.1.0) (2026-01-03)
 
 
