@@ -19,7 +19,7 @@ module.exports = {
             if (command.usage) {
                 console.log(`  Usage: ${command.name} ${command.usage}`);
             }
-            console.log("");
+            console.log("\n");
         }
         console.log("----------------------------");
     }

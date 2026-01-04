@@ -2,6 +2,7 @@
 
 module.exports = (app) => {
     const { fs, path } = app.lib;
+    const log = app.utils.logger;
     
     const actionMap = new Map();
     const commandMap = new Map();
@@ -12,7 +13,7 @@ module.exports = (app) => {
     // get all .js files (exclude index)
     const files = fs.readdirSync(actionsDir).filter(file => file.endsWith('.js') && file !== 'index.js');
 
-    console.log(`📂 Scanning actions... (${files.length} file)`);
+    log.info('ACTIONS', 'Scanning actions...', `${files.length} action files found`);
 
     for (const file of files) {
         const filePath = path.join(actionsDir, file);
@@ -39,7 +40,7 @@ module.exports = (app) => {
         }
     }
 
-    console.log(`✅ ${actionMap.size} AI actions and ${commandMap.size} commands have been loaded.`);
+    log.success('ACTIONS', 'Scanning completed:', `${actionMap.size} AI actions are ready.`); // and ${commandMap.size} user actions 
 
     return {
         actions: actionMap,

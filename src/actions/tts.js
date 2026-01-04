@@ -12,6 +12,7 @@ module.exports.actionName = 'send_voice_message';
 module.exports.execute = async function (sock, msg, params, app) {
     const { axios } = app.lib;
     const { t } = app.utils;
+    const log = app.utils.logger;
 
     let textToSpeak = '';
     let lang = app.config.LANGUAGE; // default lang from config
@@ -45,7 +46,7 @@ module.exports.execute = async function (sock, msg, params, app) {
             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' },
             responseType: 'arraybuffer'
         });
-
+        
         await sock.sendMessage(msg.key.remoteJid, {
             audio: Buffer.from(response.data),
             mimetype: 'audio/ogg; codecs=opus',
@@ -53,7 +54,7 @@ module.exports.execute = async function (sock, msg, params, app) {
         });
 
     } catch (error) {
-        console.error("❌ TTS Error:", error.message);
+        log.error('ACTIONS',"tts: An error occured", error.message);
         if (error.response && error.response.status === 400) {
             await sock.sendMessage(msg.key.remoteJid, { text: t('action_tts_error_lang', { lang }) });
         } else {

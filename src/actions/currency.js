@@ -14,8 +14,8 @@ module.exports.execute = async function (sock, msg, params, app) {
     // get params from app
     const { axios } = app.lib;
     const { t } = app.utils;
+    const log = app.utils.logger;
     const { LANGUAGE } = app.config;
-    // const currentLocale = LOCALE || LANGUAGE || 'en-US';
 
     let amount = 1.0;
     let baseCurrency = 'USD';
@@ -52,7 +52,7 @@ module.exports.execute = async function (sock, msg, params, app) {
             targetCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'TRY'];
         }
     } catch (parseError) {
-        console.error("❌ Parameter parsing error:", parseError);
+        log.error("ACTIONS", "currency: Parameter parsing error", parseError);
         await sock.sendMessage(msg.key.remoteJid, { text: t('action_currency_error_usage') });
         return;
     }
@@ -79,7 +79,7 @@ module.exports.execute = async function (sock, msg, params, app) {
             if (rate) {
                 const convertedValue = (amount * rate).toFixed(5); // 2 decimal places
                 const emoji = emojiMap[targetCode] || '💰';
-                
+
                 resultText += `${emoji} *${amount} ${baseCurrency}* = ${convertedValue} ${targetCode}\n`;
                 foundAny = true;
             }
@@ -95,14 +95,14 @@ module.exports.execute = async function (sock, msg, params, app) {
         await sock.sendMessage(msg.key.remoteJid, { text: resultText.trim() });
 
     } catch (error) {
-        console.error("Currency API Error:", error.message);
-        
+        log.error('ACTIONS', "currency: API Error", error.message);
+
         let errorMessage = t('action_currency_error_general');
         if (error.response && error.response.status === 404) {
             errorMessage = t('action_currency_error_baseNotFound', { code: baseCurrency });
         }
 
-        // If it's a user message, then it will give an error.
+        // if it's a user message, then it will give an error.
         if (typeof params === 'string') {
             await sock.sendMessage(msg.key.remoteJid, { text: errorMessage });
         }

@@ -23,30 +23,34 @@ const app = {
 };
 
 console.log('🔄 System is loading...');
-console.log(`📢 Prefix: ${app.config.PREFIX}`);
 
 // load utils
 console.log('🔄 Utils are loading...');
 app.utils = require('./utils')(app);
-console.log('✅ Utils are ready.');
+log = app.utils.logger;
+log.success('BOOT', 'Utils are ready!');
+
+console.log(`📢 Prefix: ${app.config.PREFIX}`);
+
+
 
 // load ai services
-console.log('🔄 AI Services are launching...');
+log.info('BOOT', 'AI Services are launching...');
 app.services = require('./services')(app);
 const provider = app.config.AI.activeProvider;
 const modelInfo = app.config.AI[provider];
-console.log(`✅ AI Service ready. Active Model: ${provider.toUpperCase()} / ${modelInfo?.model?.toUpperCase() || 'UNKNOWN'}`);
+log.success('BOOT', `AI Service ready! Active Model: ${provider.toUpperCase()} / ${modelInfo?.model?.toUpperCase() || 'UNKNOWN'}`);
 
 // load ai actions & prefix commands
-console.log('🔄 Actions and Commands are loading...');
+log.info('BOOT', 'Actions are loading...');
 const loadedActions = require('./actions')(app); 
 
 // Put the maps into the app.
 app.actions = loadedActions.actions;
 app.commands = loadedActions.commands;
 
-console.log(`✅ ${app.actions.size} Actions and ${app.commands.size} Commands are ready.`);
-console.log('🟢 ALL SYSTEMS ARE OPERATIONAL!');
-console.log('🚀 BOT READY!');
+log.success('BOOT', `${app.actions.size} Actions are ready!`);
+log.success('SYSTEM', 'ALL SYSTEMS ARE OPERATIONAL!'); // 🟢
+log.success('SYSTEM', 'BOT READY!'); // 🚀
 
 module.exports = app;

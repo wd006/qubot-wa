@@ -1,32 +1,50 @@
 // index.js
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, delay } = require('@whiskeysockets/baileys');
+const util = require('util');
+
+// baileys log blocker
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+const originalInfo = console.info;
+
+// word blacklist
+const IGNORED_LOGS = [
+    'Closing session: SessionEntry', 'Session error:', 'Bad MAC', 'Failed to decrypt',
+    'ratchet', 'preKey', 'chainKey', 'identityKey', 'invalid message', 'axolotl' 
+];
+
+function shouldSilence(args) {
+    const msg = util.format(...args);
+    return IGNORED_LOGS.some(phrase => msg.includes(phrase));
+}
+
+// override console
+console.log = (...args) => { if (!shouldSilence(args)) originalLog.apply(console, args); };
+console.error = (...args) => { if (!shouldSilence(args)) originalError.apply(console, args); };
+console.warn = (...args) => { if (!shouldSilence(args)) originalWarn.apply(console, args); };
+console.info = (...args) => { if (!shouldSilence(args)) originalInfo.apply(console, args); };
+
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 
 const app = require('./src/app');
 const repl = require('./src/repl');
+// call handler
+const handleMessage = require('./src/handlers/message');
 
+const log = app.utils.logger;
 let isReplStarted = false;
-
-async function simulateTyping(sock, jid, text) {
-    if (!app.config.COMPOSING.enabled) return;
-    const { charPerSec, minDelay, maxDelay } = app.config.COMPOSING;
-    let typingDuration = (text.length / charPerSec) * 1000;
-    typingDuration += Math.random() * 1000;
-    typingDuration = Math.max(minDelay, Math.min(typingDuration, maxDelay));
-    await sock.sendPresenceUpdate('composing', jid);
-    await delay(typingDuration);
-    await sock.sendPresenceUpdate('paused', jid);
-}
 
 async function connect() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_session');
 
     const sock = makeWASocket({
-        logger: pino({ level: 'silent' }),
+        logger: pino({ level: 'silent' }), 
         printQRInTerminal: false,
         auth: state,
         generateHighQualityLinkPreview: true,
+        browser: ["Ubuntu", "Chrome", "20.0.04"] 
     });
 
     sock.ev.on('connection.update', (update) => {
@@ -35,19 +53,18 @@ async function connect() {
         if (qr) {
             console.log("\n");
             qrcode.generate(qr, { small: true });
-            console.log("📲 Please scan the QR code from WhatsApp.\n");
+            log.info("CONN", "📲 Please scan the QR code from WhatsApp.");
         }
-
         if (connection === 'close') {
             const reason = (lastDisconnect.error)?.output?.statusCode || (lastDisconnect.error)?.message;
-            console.error('❌ Connection Error:', lastDisconnect.error);
+            log.error('CONN', 'Connection Error:', lastDisconnect.error);
             const shouldReconnect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log(`⚠️ Connection lost! (code: ${reason}). reconnect? -> ${shouldReconnect}`);
+            log.warn('CONN', 'Connection lost!', `(code: ${reason}). reconnect? -> ${shouldReconnect}`);
             if (shouldReconnect) connect();
         } else if (connection === 'open') {
-            console.log(`\n✅ WHATSAPP CONNECTION SUCCESSFUL!`);
-            console.log(`🧠 Active AI: ${app.config.AI.activeProvider.toUpperCase()} / ${(app.config.AI[app.config.AI.activeProvider].model).toUpperCase()}`);
-            console.log(`🤖 Bot is Ready. Prefix: "${app.config.PREFIX}"`);
+            log.success('CONN', 'WhatsApp connection successful!');
+            log.info('AI', 'Current AI Model:', `${app.config.AI.activeProvider.toUpperCase()} / ${(app.config.AI[app.config.AI.activeProvider].model).toUpperCase()}`);
+            log.info('SYSTEM', `Prefix: "${app.config.PREFIX}"`);
             if (!isReplStarted) {
                 repl.start(sock, app);
                 isReplStarted = true;
@@ -57,76 +74,8 @@ async function connect() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    sock.ev.on('messages.upsert', async (m) => {
-        try {
-            const msg = m.messages[0];
-            if (!msg.message || msg.key.fromMe) return;
-
-            app.utils.logIncomingMessage(msg);
-
-            // owner control
-            const owner = app.config.OWNER_NUMBER;
-            const sender = msg.key.participant || msg.key.remoteJid;
-
-            if (owner) { // is it defined in .env?
-                // compare only numbers
-                if (sender.split('@')[0] !== owner.split('@')[0]) {
-                    console.log(`🚫 Access Denied: Message from ${sender} is not from the owner.`);
-                    return; // denied
-                }
-            }
-
-            // get body for prexified commands
-            const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text;
-
-            // --- PREFIXED COMMANDS ---
-            if (body && body.startsWith(app.config.PREFIX)) {
-                const args = body.slice(app.config.PREFIX.length).trim().split(/ +/);
-                const commandName = args.shift().toLowerCase();
-                const commandHandler = app.commands.get(commandName);
-                
-                if (commandHandler) {
-                    console.log(`⚡️ Prefix Command Detected: ${commandName}`);
-                    await commandHandler.execute(sock, msg, args.join(' '), app);
-                    return;
-                }
-            }
-
-            // --- AI REQUEST ---
-            
-            // richPrompt
-            const richPrompt = await app.utils.prompt.build(sock, msg);
-            console.log('\n🧠 Prompt going to AI:\n', richPrompt);
-
-            // send to active ai service
-            const aiDecision = await app.services.active.getResponse(richPrompt);
-            
-            if (!aiDecision || !aiDecision.thought) {
-                console.error("❌ A valid JSON decision could not be obtained from the AI.");
-                return;
-            }
-            
-            app.utils.logAIDecision(aiDecision);
-
-            // --- DECISION HANDLING ---
-            if (aiDecision.should_reply && aiDecision.reply_text) {
-                await simulateTyping(sock, msg.key.remoteJid, aiDecision.reply_text);
-                await sock.sendMessage(msg.key.remoteJid, { text: aiDecision.reply_text }, { quoted: msg });
-            }
-
-            if (aiDecision.action) {
-                const actionHandler = app.actions.get(aiDecision.action.type);
-                if (actionHandler) {
-                    await actionHandler.execute(sock, msg, aiDecision.action.params, app);
-                } else {
-                    console.error(`❌ ERROR: AI requested a non-existent action -> ${aiDecision.action.type}`);
-                }
-            }
-
-        } catch (err) {
-            console.error("❌ Main Loop Error:", err);
-        }
-    });
+    // upsert messages
+    sock.ev.on('messages.upsert', (m) => handleMessage(sock, m, app));
 }
 
 connect();

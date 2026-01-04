@@ -3,6 +3,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = (app) => {
     const { t } = app.utils;
+    const log = app.utils.logger;
     const geminiConfig = app.config.AI.gemini;
 
     const genAI = new GoogleGenerativeAI(geminiConfig.apiKey);
@@ -25,7 +26,7 @@ module.exports = (app) => {
             return JSON.parse(cleaned);
 
         } catch (error) {
-            console.error("❌ Gemini Error:", error.message);
+            log.error('AI', 'gemini: An error occured', error.message);
             
             return {
                 should_reply: true,

@@ -8,6 +8,7 @@ const config = {
     PREFIX: '!',
     OWNER_NUMBER: process.env.OWNER_NUMBER,
 
+    DEBUG: false,
 
     AI: {
         activeProvider: 'gemini', // ['gemini', 'mistral']

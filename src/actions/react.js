@@ -7,8 +7,8 @@ function isEmoji(str) {
 }
 
 module.exports.command = {
-    name: 'reaction',
-    aliases: ['tepki', 'react'],
+    name: 'react',
+    aliases: ['tepki', 'reaction'],
     description: 'action_reaction_desc',
     usage: '[emoji]'
 };
@@ -17,6 +17,7 @@ module.exports.actionName = 'leave_a_reaction';
 
 module.exports.execute = async function (sock, msg, params, app) {
     const { t } = app.utils;
+    const log = app.utils.logger;
 
     let emoji;
     let targetMessageId = null;
@@ -49,7 +50,7 @@ module.exports.execute = async function (sock, msg, params, app) {
                 targetKey.participant = contextInfo.participant;
             }
         }
-        console.log(`🎯 AI Reaction (Targeted): ${targetMessageId}`);
+        log.info('ACTIONS', 'react: AI Targeted', `Reacting to: ${targetMessageId}`);
     }
     // !react
     else if (typeof params === 'string' && contextInfo && contextInfo.stanzaId) {
@@ -58,12 +59,12 @@ module.exports.execute = async function (sock, msg, params, app) {
             id: contextInfo.stanzaId,
             participant: contextInfo.participant // for groups
         };
-        console.log(`🎯 User Command Reply: ${contextInfo.stanzaId}`);
+        log.info('ACTIONS', 'react: User Replied with Command', `Reacting to: ${contextInfo.stanzaId}`);
     }
     // no target, react to trigger msg
     else {
         targetKey = msg.key;
-        console.log(`🎯 AI Reaction (Current Msg): ${msg.key.id}`);
+        log.info('ACTIONS', 'react: AI Untargeted (Trigger Msg)', `Reacting to: ${msg.key.id}`);
     }
 
     try {
@@ -80,6 +81,6 @@ module.exports.execute = async function (sock, msg, params, app) {
             }
         }
     } catch (error) {
-        console.error("❌ Reaction Error:", error.message);
+        log.error('ACTIONS', "react: An error occured", error.message);
     }
 };

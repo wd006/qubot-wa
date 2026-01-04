@@ -2,7 +2,8 @@
 
 module.exports = (app) => {
     const { fs, path } = app.lib;
-    
+    const log = require('./logger');
+
     // *.prompt's
     let systemInstruction = "";
 
@@ -13,7 +14,7 @@ module.exports = (app) => {
             const content = fs.readFileSync(filePath, 'utf8');
             return content.replace(/<!--[\s\S]*?-->/g, '').trim(); 
         } catch (e) {
-            console.error(`⚠️ Prompt can not read: ${fileName}`, e.message);
+            log.error('UTILS', `prompt: Prompt file can not read: ${fileName}`, e.message);
             return "";
         }
     }
@@ -26,7 +27,7 @@ module.exports = (app) => {
             : loadFile('persona.prompt.example'); // if the file has not been renamed
 
         systemInstruction = `${pCore}\n\n${pActions}\n\n${pPersona}`;
-        console.log("✅ Prompt files are ready");
+        log.success('UTILS', "prompt: Prompt files are ready");
     }
 
     // load initally
@@ -36,7 +37,7 @@ module.exports = (app) => {
     async function build(sock, msg) {
         // parser
         const parsedMsg = app.utils.parser.parse(msg);
-        console.log(parsedMsg);
+        log.debug('PARSE MSG', 'Output:', parsedMsg);
         if (!parsedMsg) return ""; // return blank on error
 
         const { meta, content, context } = parsedMsg;

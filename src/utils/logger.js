@@ -1,6 +1,6 @@
 // src/utils/logger.js
-// arrow: ↳
 const util = require('util');
+const config = require('../config');
 
 const colors = {
     reset: "\x1b[0m",
@@ -18,67 +18,55 @@ const colors = {
 const timestamp = () => `\x1b[90m[${new Date().toLocaleTimeString()}]\x1b[0m`;
 const tag = (label, color) => `${color}[${label.toUpperCase()}]${colors.reset}`;
 
-const printExtras = (args) => {
-    if (args.length === 0) return;
-
-    // main
-    const mainDetail = args[0];
-    if (typeof mainDetail === 'object') {
-        // object -> show colored
-        console.log(util.inspect(mainDetail, { colors: true, depth: null, compact: false }));
-    } else {
-        // text -> show white
-        console.log(`${colors.reset}${mainDetail}`);
-    }
-
-    // other parameters
-    if (args.length > 1) {
-        const restArgs = args.slice(1);
-        restArgs.forEach(arg => {
-            const val = typeof arg === 'object' 
-                ? util.inspect(arg, { colors: true, depth: null, compact: true }) 
-                : arg;
-            // show gray
-            console.log(`${colors.dim}  - ${val}${colors.reset}`); 
-        });
-    }
+// Objeleri basmak için yardımcı (Sadece nesneler için çalışır)
+const printObjects = (args) => {
+    args.forEach(arg => {
+        if (typeof arg === 'object' && arg !== null) {
+            console.log(util.inspect(arg, { colors: true, depth: null, compact: false }));
+        }
+    });
 };
 
 const logger = {
-    info: (category, message, ...args) => {
-        console.log(`${timestamp()} ${tag(category, colors.blue)} ${message}`);
-        printExtras(args);
+    // Genel Yazdırma Fonksiyonu (DRY - Don't Repeat Yourself)
+    _print: (category, color, message, args) => {
+        // Metin olan argümanları ana mesajla birleştir (Aynı satırda kalsın)
+        const textArgs = args.filter(a => typeof a !== 'object').join(' ');
+        const finalMessage = textArgs ? `${message} ${textArgs}` : message;
+
+        console.log(`${timestamp()} ${tag(category, color)} ${finalMessage}`);
+
+        // Sadece objeleri alt satıra bas
+        const objArgs = args.filter(a => typeof a === 'object');
+        printObjects(objArgs);
     },
 
-    success: (category, message, ...args) => {
-        console.log(`${timestamp()} ${tag(category, colors.green)} ${message}`);
-        printExtras(args);
-    },
-
-    warn: (category, message, ...args) => {
-        console.log(`${timestamp()} ${tag(category, colors.yellow)} ${message}`);
-        printExtras(args);
-    },
+    info: (category, message, ...args) => logger._print(category, colors.blue, message, args),
+    success: (category, message, ...args) => logger._print(category, colors.green, message, args),
+    warn: (category, message, ...args) => logger._print(category, colors.yellow, message, args),
 
     error: (category, message, ...args) => {
         console.error(`${timestamp()} ${tag(category, colors.red)} ${message}`);
-        printExtras(args);
+        // Hata durumunda her şeyi detaylı bas
+        args.forEach(arg => console.error(arg));
     },
 
     debug: (category, message, ...args) => {
-        console.log(`${timestamp()} ${tag(category, colors.magenta)} ${colors.dim}${message}${colors.reset}`);
-        printExtras(args);
+        if (config.DEBUG) {
+            console.log(`${timestamp()} ${tag(category, colors.magenta)} ${colors.dim}${message}${colors.reset}`);
+            args.forEach(arg => console.log(util.inspect(arg, { colors: true, compact: true })));
+        }
     },
 
-    // box logs
+    // --- KUTULAR (Aynı Kalıyor - Temiz Görüntü İçin) ---
     incoming: (parsedMsg) => {
         if (!parsedMsg) return;
         const { meta, content, context } = parsedMsg;
-        
+
         console.log(`\n${colors.cyan}┌── 📥 INCOMING ${new Date().toLocaleTimeString()} ──────────────────────────┐${colors.reset}`);
         console.log(`│ ${colors.yellow}From:${colors.reset}    ${meta.pushName} (${meta.participant.split('@')[0]})`);
         if (meta.isGroup) console.log(`│ ${colors.yellow}Chat:${colors.reset}    Group (${meta.remoteJid.split('@')[0]})`);
-        
+
         const typeLabel = content.isMedia ? `[${content.type}]` : '';
         const cleanBody = content.body ? content.body.replace(/\n/g, ' ') : '';
         console.log(`│ ${colors.yellow}Body:${colors.reset}    ${colors.white}${typeLabel} ${cleanBody}${colors.reset}`);

@@ -1,5 +1,4 @@
 // src/services/index.js
-
 const mistralLoader = require('./mistral');
 const geminiLoader = require('./gemini');
 
@@ -8,8 +7,6 @@ module.exports = (app) => {
     const mistral = mistralLoader(app);
     const gemini = geminiLoader(app);
 
-
-    
     return {
         mistral,
         gemini,

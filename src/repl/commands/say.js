@@ -3,7 +3,10 @@ module.exports = {
     description: 'repl_say_desc',
     usage: '<chat_id> <message>',
 
-    execute: async function (sock, args) {
+    execute: async function (sock, args, app, commands) {
+
+        const log = app.utils.logger;
+
         if (args.length < 2) {
             console.log(`❌ Usage: ${this.name} ${this.usage}`);
             return;
@@ -19,9 +22,9 @@ module.exports = {
 
         try {
             await sock.sendMessage(chatId, { text: message }); //, mentions: participants
-            console.log(`✅ Message sent to: "${chatId}"`);
+            log.success('REPL', `say: Message sent to: "${chatId}"`);
         } catch (e) {
-            console.error("❌ Message could not be sent:", e.message);
+            log.error('REPL', 'say: Message could not be sent', e.message);
         }
     }
 };

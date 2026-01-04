@@ -2,7 +2,10 @@ module.exports = {
     name: 'groups',
     description: 'repl_groups_desc',
     
-    execute: async function(sock, args) {
+    execute: async function(sock, args, app, commands) {
+
+        const log = app.utils.logger;
+
         try {
             // group function from baileys
             const groups = await sock.groupFetchAllParticipating();
@@ -23,7 +26,7 @@ module.exports = {
             console.log("\n------------------------------------");
 
         } catch (e) {
-            console.error("❌ An error occurred while listing the groups:", e);
+            log.error('REPL', 'groups: An error occurred', e);
         }
     }
 };

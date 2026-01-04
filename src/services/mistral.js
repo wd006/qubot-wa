@@ -1,8 +1,8 @@
 // src/services/mistral.js
-
 module.exports = (app) => {
     const { axios } = app.lib;
     const { t } = app.utils;
+    const log = app.utils.logger;
 
     const mistralConfig = app.config.AI.mistral; 
 
@@ -39,7 +39,7 @@ module.exports = (app) => {
             return JSON.parse(rawResponse);
 
         } catch (error) {
-            console.error("❌ Mistral Error:", error.response ? error.response.data : error.message);
+            log.error('AI', "misral: An error occured", error.response ? error.response.data : error.message);
             
             let errorMessage = t('service_ai_error_general');
             if (error.response?.status === 401) errorMessage = t('service_ai_error_apikey');

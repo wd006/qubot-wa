@@ -8,9 +8,10 @@ module.exports.command = {
 
 module.exports.actionName = 'wikipedia_search';
 
-module.exports.execute = async function(sock, msg, params, app) {
+module.exports.execute = async function (sock, msg, params, app) {
     const { axios } = app.lib;
     const { t } = app.utils;
+    const log = app.utils.logger;
     const { LANGUAGE } = app.config;
 
     const query = typeof params === 'string' ? params : params.query;
@@ -28,20 +29,20 @@ module.exports.execute = async function(sock, msg, params, app) {
         // search and find full title
         const searchUrl = `https://${LANGUAGE}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&namespace=0&format=json`;
         const searchResponse = await axios.get(searchUrl, { headers });
-        
+
         // Opensearch answer: [query, [Title], [Desc], [Link]]
         const pageTitle = searchResponse.data[1][0];
         const pageLink = searchResponse.data[3][0];
-        
+
         if (!pageTitle) {
-            await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_notFound', {'query': query}) });
+            await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_notFound', { 'query': query }) });
             return;
         }
 
         // fetch summary text
         const summaryUrl = `https://${LANGUAGE}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&redirects=1&format=json&titles=${encodeURIComponent(pageTitle)}`;
         const summaryResponse = await axios.get(summaryUrl, { headers });
-        
+
         const pages = summaryResponse.data.query.pages;
         const pageId = Object.keys(pages)[0];
         const extract = pages[pageId].extract;
@@ -50,7 +51,7 @@ module.exports.execute = async function(sock, msg, params, app) {
             await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_summary') });
             return;
         }
-        
+
         // output
         const resultText = `
 📖 *${t('action_wiki_header', { title: pageTitle })}*
@@ -63,7 +64,7 @@ _🔗 ${pageLink || ''}_`;
         await sock.sendMessage(msg.key.remoteJid, { text: resultText.trim() });
 
     } catch (error) {
-        console.error("❌ Wikipedia Error:", error.message);
+        log.error('ACTIONS', 'wiki: An error occured', error.message);
         await sock.sendMessage(msg.key.remoteJid, { text: t('action_wiki_error_general') });
     }
 };
