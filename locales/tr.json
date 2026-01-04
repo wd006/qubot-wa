@@ -1,6 +1,6 @@
 {
   "general_error": "❌ Oops! 🤖 Dostum, Bazı sorunlar yaşıyorum! 🔧 Lütfen daha sonra tekrar dene.",
-  "general_maintence": "🔧 Dostum şu anda bakımdayım. Geliştiricilerim \"{why}\" üzerinde çalışıyor. Lütfen daha sonra tekrar dene.",
+  "general_maintenance": "🔧 Dostum şu anda bakımdayım. Geliştiricilerim \"{why}\" üzerinde çalışıyor. Lütfen daha sonra tekrar dene.",
   
   "action_currency_desc": "Döviz kurlarını çevirir ve listeler.",
   "action_currency_header": "Döviz Çevirici",
