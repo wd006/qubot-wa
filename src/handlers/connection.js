@@ -46,5 +46,6 @@ module.exports = (sock, app, reconnectFunc) => {
         }
     });
 
+    // listen creds.update from app.state
     sock.ev.on('creds.update', app.state.saveCreds);
 };
