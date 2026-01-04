@@ -25,8 +25,9 @@ function loadCommands() {
 /**
  * The terminal starts the command prompt.
  * @param {object} sock - Baileys socket connector
+ * @param {object} app - config, utils...
  */
-function start(sock) {
+function start(sock, app) {
     loadCommands();
 
     console.log("⌨️  The terminal command prompt is active. You can start by typing 'help'.");
@@ -47,7 +48,7 @@ function start(sock) {
         if (command) {
             try {
                 // send the entire list of commands specifically to the help command.
-                await command.execute(sock, args, commands);
+                await command.execute(sock, args, app, commands);
             } catch (error) {
                 console.error(`❌ An error occurred while executing the command. (${commandName}):`, error);
             }

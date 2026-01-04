@@ -34,11 +34,13 @@ module.exports = (app) => {
 
     // dynamic context from message
     async function build(sock, msg) {
+        // parser
+        const parsedMsg = app.utils.parser.parse(msg);
+        console.log(parsedMsg);
+        if (!parsedMsg) return ""; // return blank on error
+
+        const { meta, content, context } = parsedMsg;
         const { LOCALE } = app.config;
-        const chatId = msg.key.remoteJid;
-        const isGroup = chatId.endsWith('@g.us');
-        // sender = group -> participant, dm -> remoteJid
-        const senderJid = msg.key.participant || chatId;
 
         // date-time
         const now = new Date();
@@ -47,85 +49,51 @@ module.exports = (app) => {
             hour: '2-digit', minute: '2-digit' 
         });
 
-        // bot id, sender infos
-        // clean bot id (1xxx:12@s.whatsapp.net -> 1xxx)
-        const rawBotId = sock.user?.id || "";
-        const botIdClean = rawBotId.split(':')[0].split('@')[0]; 
-        const senderIdClean = senderJid.split(':')[0].split('@')[0];
-
-        // group info (caching system)
-        let sourceInfo = isGroup ? "Group Chat" : "Direct Message (DM)";
-        if (isGroup) {
-            let groupName = app.cache.groupNames.get(chatId);
-            // if it's not cached -> retrieve and save
+        // group info
+        let sourceInfo = meta.isGroup ? "Group Chat" : "Direct Message (DM)";
+        if (meta.isGroup) {
+            let groupName = app.cache.groupNames.get(meta.remoteJid); // caching
             if (!groupName) {
                 try {
-                    const metadata = await sock.groupMetadata(chatId);
+                    const metadata = await sock.groupMetadata(meta.remoteJid);
                     groupName = metadata.subject;
-                    app.cache.groupNames.set(chatId, groupName);
+                    app.cache.groupNames.set(meta.remoteJid, groupName);
                 } catch (e) { groupName = "Unknown Group"; }
             }
             sourceInfo += `\nGroup Name: "${groupName}"`;
         }
 
-        const senderName = msg.pushName || "Unknown User";
-        const messageId = msg.key.id;
+        // bot identity, target analysiz
+        const rawBotId = sock.user?.id || "";
+        const botIdClean = rawBotId.split(':')[0].split('@')[0];
+        const senderNumber = meta.participant.split('@')[0];
 
-        // (MENTION, REPLY, FORWARD)
-        const contextInfo = msg.message?.extendedTextMessage?.contextInfo || 
-                            msg.message?.imageMessage?.contextInfo || 
-                            msg.message?.videoMessage?.contextInfo;
+        // mentioned
+        const isExplicitlyMentioned = context.mentions.some(jid => jid.includes(botIdClean));
 
-        // tagged?
-        const mentions = contextInfo?.mentionedJid || [];
-        const isExplicitlyMentioned = mentions.some(jid => jid.includes(botIdClean));
-
-        // forwarded?
-        const isForwarded = contextInfo?.isForwarded || false;
-
-        // replied?
+        // replied (from parser)
         let isReplyToBot = false;
         let quotedBlock = "";
 
-        if (contextInfo && contextInfo.quotedMessage) {
-            const quotedParticipant = contextInfo.participant || ""; 
-            const quotedParticipantClean = quotedParticipant.split(':')[0].split('@')[0];
-
-            // replied to bot?
-            if (quotedParticipantClean === botIdClean) {
+        if (context.reply) {
+            const replySenderNum = context.reply.participant.split('@')[0];
+            
+            // reply to bot?
+            if (replySenderNum === botIdClean) {
                 isReplyToBot = true;
             }
 
-            const qMsg = contextInfo.quotedMessage;
-            const qBody = qMsg.conversation || qMsg.extendedTextMessage?.text || "[Media/Other]";
-            
-            // say to bot
-            const qOwner = isReplyToBot ? "YOU (Your earlier message)" : `User (+${quotedParticipantClean})`;
-            
-            quotedBlock = `\n\n--- REPLIED MESSAGE ---\nAuthor: ${qOwner}\nContent: "${qBody}"\n-----------------------`;
+            const qOwner = isReplyToBot ? "YOU (Your earlier message)" : `User (+${replySenderNum})`;
+            quotedBlock = `\n\n--- REPLIED MESSAGE ---\nAuthor: ${qOwner}\nContent: "${context.reply.body}"\nMessage ID: ${context.reply.id}\n-----------------------`;
         }
 
-        // should bot talk?
         const attentionStatus = (isExplicitlyMentioned || isReplyToBot) ? "YES (Priority)" : "NO";
 
-        // message content
-        const messageType = Object.keys(msg.message)[0];
-        let content = "";
+        // msg content note
         let mediaNote = "";
-
-        if (messageType === 'conversation') {
-            content = msg.message.conversation;
-        } else if (messageType === 'extendedTextMessage') {
-            content = msg.message.extendedTextMessage.text;
-        } else if (messageType === 'imageMessage') {
-            content = msg.message.imageMessage.caption || "";
-            mediaNote = "[User sent an IMAGE]";
-        } else if (messageType === 'audioMessage') {
-            mediaNote = "[User sent a VOICE NOTE]";
-        } else if (messageType === 'stickerMessage') {
-            mediaNote = "[User sent a STICKER]";
+        if (content.isMedia) {
+            mediaNote = `[User sent a ${content.type.replace('Message', '').toUpperCase()}] `;
         }
-
 
         const finalPrompt = `
 === [ 🌍 SYSTEM INFO ] ===
@@ -133,13 +101,13 @@ Time: ${timeStr}
 
 === [ 📍 CONTEXT ] ===
 Type: ${sourceInfo}
-Sender: ${senderName} (+${senderIdClean})
-Message ID: ${messageId}
+Sender: ${meta.pushName} (+${senderNumber})
+Message ID: ${meta.id}
 Targeted to You: ${attentionStatus}
-Is Forwarded: ${isForwarded ? "YES" : "NO"}
+Is Forwarded: ${context.isForwarded ? "YES" : "NO"}
 
 === [ 💬 USER MESSAGE ] ===
-${mediaNote ? `TYPE: ${mediaNote}\n` : ''}CONTENT: "${content}"${quotedBlock}
+${mediaNote}CONTENT: "${content.body}"${quotedBlock}
 `.trim();
 
         return finalPrompt;
