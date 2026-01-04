@@ -10,7 +10,7 @@ module.exports = (app) => {
     const promptManager = promptLoader(app);
 
     return {
-        ...logger,
+        logger,
         t: l10n.t,
         parser: parser,
         prompt: promptManager
