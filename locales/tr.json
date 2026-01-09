@@ -13,6 +13,9 @@
   "action_reaction_error_general": "Emoji koyarken bir sorun oluştu.",
   "action_reaction_error_usage": "Yanlış format kullandın. 1 tane emoji koymalısın.",
 
+  "action_sticker_desc": "Yanıtlanan veya gönderilen resim mesajını çıkartmaya dönüştürür.",
+  "action_sticker_error_usage": "Neyi çıkartmaya dönüştürmemi istiyorsun?",
+
   "action_tts_desc": "Metni sesli mesaja çevirir. Örnek: !konus en Hello World",
   "action_tts_error_general": "Ses tellerimde bir sorun var, şu an konuşamıyorum. 🤒",
   "action_tts_error_usage": "Ne söylememi istediğini yazmadın.",

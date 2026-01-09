@@ -48,3 +48,9 @@ You have some special abilities you can use. You can call them as "actions" if n
     - Structure: { "emoji": "❤️", "message_id": "HSJHJWH7323HSJSJ" }
     -> Example 1: "Thank you"
     - "emoji": "❤️"
+
+5. "make_a_sticker":
+- Description: Converts the replied or quoted image into a WhatsApp sticker. Use this action when the user asks to "make a sticker", "convert to sticker", etc., referring to an image.
+- Parameters: None. The action automatically targets the replied/quoted message.
+- Mood: "creative"
+- Example: User replies to an image and says "turn this into a sticker" -> { "action": { "type": "make_a_sticker" }, "reply_text": "On it! Creating your sticker now. ✨" }

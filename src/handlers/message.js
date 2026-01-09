@@ -36,8 +36,11 @@ module.exports = async function handleMessage(sock, m, app) {
             }
         }
 
-        const body = msg.message?.conversation || msg.message?.extendedTextMessage?.text;
-
+        const body = msg.message?.conversation || 
+                     msg.message?.extendedTextMessage?.text || 
+                     msg.message?.imageMessage?.caption || 
+                     msg.message?.videoMessage?.caption;
+                     
         // --- PREFIXED COMMANDS (!cmd) ---
         if (body && body.startsWith(app.config.PREFIX)) {
             const args = body.slice(app.config.PREFIX.length).trim().split(/ +/);
