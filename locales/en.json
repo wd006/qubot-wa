@@ -9,6 +9,9 @@
   "action_currency_error_targetNotFound": "I couldn't find the target exchange rates you mentioned.",
   "action_currency_error_baseNotFound": "I couldn't find a currency code called \"{code}\". 🤷‍♂️",
 
+  "action_gen-image_desc": "Creates an image according to your request.",
+  "action_gen-image_error_general": "❌ A connection error occurred while generating the image.",
+
   "action_reaction_desc": "Adds a reaction to the message you replied to.",
   "action_reaction_error_general": "There was a problem adding the emoji.",
   "action_reaction_error_usage": "You used the wrong format. You must provide exactly 1 emoji.",
@@ -21,7 +24,7 @@
   "action_tts_error_usage": "You didn't write what you want me to say.",
   "action_tts_error_lang": "I don't support the language code \"{lang}\" or you misspelled it. 🤷‍♂️",
   
-  "action_wiki_desc": "It retrieves summary information on a topic from Wikipedia.",
+  "action_wiki_desc": "Retrieves summary information on a topic from Wikipedia.",
   "action_wiki_header": "Wikipedia Info: {title}",
   "action_wiki_goLink": "For more information",
   "action_wiki_error_general": "There was a problem connecting to Wikipedia.",

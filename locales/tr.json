@@ -9,6 +9,9 @@
   "action_currency_error_targetNotFound": "Belirttiğin hedef kurları bulamadım.",
   "action_currency_error_baseNotFound": "\"{code}\" diye bir döviz kuru bulamadım. 🤷‍♂️",
 
+  "action_gen-image_desc": "İsteğinize göre bir resim oluşturur.",
+  "action_gen-image_error_general": "❌ Görsel oluşturulurken bağlantı hatası oluştu.",
+
   "action_reaction_desc": "Yanıtlanan mesaja tepki bırakır.",
   "action_reaction_error_general": "Emoji koyarken bir sorun oluştu.",
   "action_reaction_error_usage": "Yanlış format kullandın. 1 tane emoji koymalısın.",
