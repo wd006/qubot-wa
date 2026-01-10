@@ -32,6 +32,7 @@
   "action_wiki_error_notFound": "\"{query}\" hakkında bir Vikipedi sayfası bulamadım. 🧐",
   "action_wiki_error_summary": "Sayfayı buldum ama özetini alamadım.",
 
+  "repl_clear_desc": "Terminal ekranındaki tüm kayıtları temizler.",
   "repl_groups_desc": "Botun üye olduğu tüm grupları listeler.",
   "repl_help_desc": "Tüm komutları listeler.",
   "repl_say_desc": "Belirtilen sohbete mesaj gönderir.",

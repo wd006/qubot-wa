@@ -32,6 +32,7 @@
   "action_wiki_error_notFound": "I couldn't find a Wikipedia page for \"{query}\". 🧐",
   "action_wiki_error_summary": "I found the page but couldn't get a summary.",
 
+  "repl_clear_desc": "Clears all logs on the terminal screen.",
   "repl_groups_desc": "Lists all the groups the bot is a part of.",
   "repl_help_desc": "Lists all commands.",
   "repl_say_desc": "It sends a message to the specified address.",
