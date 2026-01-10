@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/wd006/qubot-wa/compare/v2.2.0...v2.3.0) (2026-01-10)
+
+
+### Features
+
+* **actions:** implement basic AI image generation ([a708b69](https://github.com/wd006/qubot-wa/commit/a708b69d6e0fc615518a16cf5f4ad00e53eba069))
+* **actions:** implement img-to-sticker generation ([1f19a28](https://github.com/wd006/qubot-wa/commit/1f19a28fcad863f0cf4f3cf9c6b662d40adb0eec))
+* **repl:** add 'clear' command to clean terminal ([7caa9cc](https://github.com/wd006/qubot-wa/commit/7caa9cc774ef817fb1d7c9d4303211db407bb827))
+* **utils:** implement advanced structured logger ([ce8319e](https://github.com/wd006/qubot-wa/commit/ce8319e1b27a8ae2bcd0668810b3f8da11d871dd))
+
 ## [2.2.0](https://github.com/wd006/qubot-wa/compare/v2.1.0...v2.2.0) (2026-01-04)
 
 
