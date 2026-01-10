@@ -30,16 +30,20 @@ app.utils = require('./utils')(app);
 log = app.utils.logger;
 log.success('BOOT', 'Utils are ready!');
 
-console.log(`📢 Prefix: ${app.config.PREFIX}`);
+log.info('SYSTEM', `Prefix: ${app.config.PREFIX}`);
 
 
 
 // load ai services
 log.info('BOOT', 'AI Services are launching...');
 app.services = require('./services')(app);
-const provider = app.config.AI.activeProvider;
-const modelInfo = app.config.AI[provider];
-log.success('BOOT', `AI Service ready! Active Model: ${provider.toUpperCase()} / ${modelInfo?.model?.toUpperCase() || 'UNKNOWN'}`);
+const LLMprovider = app.config.AI.LLM.activeProvider;
+const LLMmodelInfo = app.config.AI.LLM[LLMprovider];
+const MEDIAprovider = app.config.AI.MEDIA.activeProvider;
+const MEDIAmodelInfo = app.config.AI.LLM[MEDIAprovider];
+log.info('AI', `Setting LLM Model: ${LLMprovider.toUpperCase()} / ${LLMmodelInfo?.model?.toUpperCase() || 'UNKNOWN'}`);
+log.info('AI', `Setting MEDIA Model: ${MEDIAprovider.toUpperCase()} / ${LLMmodelInfo?.model?.toUpperCase() || 'UNKNOWN'}`);
+log.success('BOOT', `AI Services are ready!`);
 
 // load ai actions & prefix commands
 log.info('BOOT', 'Actions are loading...');

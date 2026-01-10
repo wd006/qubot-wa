@@ -40,7 +40,7 @@ module.exports = (app) => {
         }
     }
 
-    log.success('ACTIONS', 'Scanning completed:', `${actionMap.size} AI actions are ready.`); // and ${commandMap.size} user actions 
+    // log.success('ACTIONS', 'Scanning completed:', `${actionMap.size} AI actions are ready.`); // and ${commandMap.size} user actions 
 
     return {
         actions: actionMap,

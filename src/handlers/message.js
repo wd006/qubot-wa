@@ -67,7 +67,7 @@ module.exports = async function handleMessage(sock, m, app) {
         log.debug('AI', 'Prompt Sending:', richPrompt);
 
         // send to active ai service
-        const aiDecision = await app.services.active.getResponse(richPrompt);
+        const aiDecision = await app.services.ai.llm.getResponse(richPrompt);
 
         if (!aiDecision || !aiDecision.thought) {
             log.error('AI', "A valid JSON decision could not be obtained from the AI.");

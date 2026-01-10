@@ -10,7 +10,9 @@
   "action_currency_error_baseNotFound": "\"{code}\" diye bir döviz kuru bulamadım. 🤷‍♂️",
 
   "action_gen-image_desc": "İsteğinize göre bir resim oluşturur.",
-  "action_gen-image_error_general": "❌ Görsel oluşturulurken bağlantı hatası oluştu.",
+  "action_gen-image_error_general": "❌ Görsel oluşturulamadı.",
+  "action_gen-image_error_busy": "Görsel oluşturma servisi şu an çok yoğun, lütfen biraz bekleyip tekrar dene.",
+  "action_gen-image_error_ratelimit": "Çok fazla istek gönderdin, lütfen biraz bekleyip tekrar dene.",
 
   "action_reaction_desc": "Yanıtlanan mesaja tepki bırakır.",
   "action_reaction_error_general": "Emoji koyarken bir sorun oluştu.",
@@ -38,6 +40,6 @@
   "repl_say_desc": "Belirtilen sohbete mesaj gönderir.",
 
   "service_ai_error_general": "AI Sağlayıcısına bağlanılamıyor. Daha sonra tekrar deneyin.",
-  "service_ai_error_apiKey": "API anahtarım geçersiz veya yanlış yapılandırılmış.",
-  "service_ai_error_rateLimit": "API limitine takıldım, biraz dinlenmem lazım."
+  "service_ai_error_apikey": "API anahtarım geçersiz veya yanlış yapılandırılmış.",
+  "service_ai_error_ratelimit": "API limitine takıldım, biraz dinlenmem lazım."
 }

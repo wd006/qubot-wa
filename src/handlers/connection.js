@@ -31,12 +31,6 @@ module.exports = (sock, app, reconnectFunc) => {
             }
         } else if (connection === 'open') {
             log.success('CONN', 'WhatsApp connection successful!');
-            
-            // AI Info Log
-            const aiProvider = app.config.AI.activeProvider;
-            const aiModel = app.config.AI[aiProvider]?.model || 'unknown';
-            log.info('AI', 'Current AI Model:', `${aiProvider.toUpperCase()} / ${aiModel.toUpperCase()}`);
-            log.info('SYSTEM', `Prefix: "${app.config.PREFIX}"`);
 
             // Start REPL only once
             if (!isReplStarted) {

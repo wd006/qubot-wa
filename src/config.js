@@ -11,16 +11,31 @@ const config = {
     DEBUG: false,
 
     AI: {
-        activeProvider: 'gemini', // ['gemini', 'mistral']
+        LLM: {
+            activeProvider: 'gemini', // ['gemini', 'mistral']
+            
+            mistral: {
+                apiKey: process.env.MISTRAL_KEY,
+                model: "open-mixtral-8x7b" // ['open-mistral-7b', 'open-mixtral-8x7b']
+            },
+            gemini: {
+                apiKey: process.env.GEMINI_KEY,
+                model: "gemini-2.0-flash" // ['gemini-2.0-flash', 'gemini-flash-latest', ...]
+            }
+        },
 
-        mistral: {
-            apiKey: process.env.MISTRAL_KEY,
-            model: "open-mixtral-8x7b" // ['open-mistral-7b', 'open-mixtral-8x7b']
-        },
-        gemini: {
-            apiKey: process.env.GEMINI_KEY,
-            model: "gemini-2.0-flash" // ['gemini-flash-latest', 'gemini-2.0-flash']
-        },
+        MEDIA: {
+            activeProvider: 'pollinations', // ['hf', 'pollinations']
+
+            hf: {
+                apiKey: process.env.HF_KEY,
+                model: "black-forest-labs/FLUX.1-dev"
+            },
+            pollinations: {
+                apiKey: process.env.POLLINATIONS_KEY,
+                model: "flux"
+            }
+        }
     },
 
     // typing effect

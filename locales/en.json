@@ -10,7 +10,9 @@
   "action_currency_error_baseNotFound": "I couldn't find a currency code called \"{code}\". 🤷‍♂️",
 
   "action_gen-image_desc": "Creates an image according to your request.",
-  "action_gen-image_error_general": "❌ A connection error occurred while generating the image.",
+  "action_gen-image_error_general": "❌ Image could not be generated.",
+  "action_gen-image_error_busy": "The image generation service is currently very busy, please wait a moment and try again.",
+  "action_gen-image_error_ratelimit": "You've sent too many requests, please wait a bit and try again.",
 
   "action_reaction_desc": "Adds a reaction to the message you replied to.",
   "action_reaction_error_general": "There was a problem adding the emoji.",
@@ -38,6 +40,6 @@
   "repl_say_desc": "It sends a message to the specified address.",
 
   "service_ai_error_general": "Cannot connect to the AI Provider. Please try again later.",
-  "service_ai_error_apiKey": "My API key is invalid or incorrectly configured.",
-  "service_ai_error_rateLimit": "I hit the API rate limit, I need to rest a bit."
+  "service_ai_error_apikey": "My API key is invalid or incorrectly configured.",
+  "service_ai_error_ratelimit": "I hit the API rate limit, I need to rest a bit."
 }
