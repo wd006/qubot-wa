@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/wd006/qubot-wa/compare/v2.3.0...v3.0.0) (2026-01-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** The 'src/config.js' file structure has been altered.
+The flat 'AI' object is replaced with nested 'AI.LLM' and 'AI.MEDIA'
+objects. Existing configurations must be updated to the new schema.
+Additionally, new environment variables (HF_KEY, POLLINATIONS_KEY) are
+now required to utilize the specific image providers fully.
+
+* **core:** overhaul AI layer & add media gen ([bf9cefa](https://github.com/wd006/qubot-wa/commit/bf9cefa2e06fe8ed91ddb6ad665bc4289c803ad9))
+
 ## [2.3.0](https://github.com/wd006/qubot-wa/compare/v2.2.0...v2.3.0) (2026-01-10)
 
 
