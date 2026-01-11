@@ -21,6 +21,13 @@
   "action_sticker_desc": "Converts a replied to or sent image message into a sticker.",
   "action_sticker_error_usage": "What do you want to turn into a sticker?",
 
+  "action_translate_desc": "Translates the text into the desired language.",
+  "action_translate_header": "Translation",
+  "action_translate_error_general": "A problem occurred during the translation.",
+  "action_translate_error_usage": "Invalid usage! For information: !help translate",
+  "action_translate_error_notext": "No text was found to translate.",
+  "action_translate_error_lang": "Invalid language code",
+
   "action_tts_desc": "Converts text to speech. Example: !speak en Hello World",
   "action_tts_error_general": "There's an issue with my voice box, I can't speak right now. 🤒",
   "action_tts_error_usage": "You didn't write what you want me to say.",

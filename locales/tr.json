@@ -21,6 +21,13 @@
   "action_sticker_desc": "Yanıtlanan veya gönderilen resim mesajını çıkartmaya dönüştürür.",
   "action_sticker_error_usage": "Neyi çıkartmaya dönüştürmemi istiyorsun?",
 
+  "action_translate_desc": "Metni istenilen dile çevirir.",
+  "action_translate_header": "Çeviri",
+  "action_translate_error_general": "Çeviri sırasında bir sorun oluştu.",
+  "action_translate_error_usage": "Hatalı kullanım! Bilgi için: !help translate",
+  "action_translate_error_notext": "Çevrilecek metin bulunamadı.",
+  "action_translate_error_lang": "Geçersiz dil kodu",
+
   "action_tts_desc": "Metni sesli mesaja çevirir. Örnek: !konus en Hello World",
   "action_tts_error_general": "Ses tellerimde bir sorun var, şu an konuşamıyorum. 🤒",
   "action_tts_error_usage": "Ne söylememi istediğini yazmadın.",
