@@ -8,6 +8,12 @@ let isReplStarted = false;
 module.exports = (sock, app, reconnectFunc) => {
     const log = app.utils.logger;
 
+    // Start REPL only once
+    if (!isReplStarted) {
+        repl.start(sock, app);
+        isReplStarted = true;
+    }
+
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
 
@@ -31,12 +37,6 @@ module.exports = (sock, app, reconnectFunc) => {
             }
         } else if (connection === 'open') {
             log.success('CONN', 'WhatsApp connection successful!');
-
-            // Start REPL only once
-            if (!isReplStarted) {
-                repl.start(sock, app);
-                isReplStarted = true;
-            }
         }
     });
 
